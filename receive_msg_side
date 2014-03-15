@@ -1,0 +1,66 @@
+start process
+call handshake
+message struct - adaptable to all msg types
+log file
+handshake file/function
+log file/function
+
+Initially
+	read in .cfg's
+	set values after reading in common.cfg
+
+Note A:
+	initialize to false boolean array initiate_handshake (for each peer)
+	in initiate handshake set initiate_handshake to true
+	if initiate_handshake & receive handshake
+		send bitfield
+	if !initiate_handshake & receive handshake
+		send handshake
+	if receive bitfield & not initiate_handshake
+		send bitfield
+	
+--------------------------
+choke (moving from neighbor status to non-neighbor)
+	remove choker from senders list
+unchoke (preceded by sending an interested message)
+	add unchoker to senders list
+	send request to unchoker
+interested (previously sent bitfield or have)
+	add sender of msg to interested list
+not interested (prev sent bitfield or unrelated any other time 	due to peers receiving all pieces and completing the file)
+	remove from interested list
+have ()
+	update local copy sender's bitfield
+	case:
+		sender was interesting and still is
+			send 'interested'
+		sender was not interesting and is now interesting
+			send 'interested'
+			add to list of interesting
+		sender was not interesting and still isn't
+			no action
+bitfield (see note A)
+	update local copy of sender's bitfield
+	update interesting list
+	send 'interested' or 'not interested'
+request (sent 'unchoke' or a piece)
+	send 'piece'
+piece (after sending 'request')
+	update personal bitfield
+	send 'have' to everyone
+	inc msg received counter from this neighbor since last 
+		unchoking round (for transmitting rate)
+	update interesting list
+	remove piece from 'requests in flight' list
+	check for completion of file
+handshake (see note A)
+
+	
+
+	
+	
+
+
+
+		
+

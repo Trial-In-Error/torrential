@@ -1,0 +1,31 @@
+choke (sent during neighbor update, sent to neighbors from previous round, other peers will have already been choked from before)
+	remove choke-ee from neighbors list
+unchoke (only sent to new neighbor chosen not continuing neighbor)
+	add peer to neighbor list
+interested (sent after handshake and receiving bitfield or receiving 'have', might want to keep a 'sent interest msg to x peer list in case of duplicate interested msgs sent)
+	update interesting list
+not interested (sent after receiving bitfield or any piece)
+	remove send-ee from interested list
+have (just received a complete piece, send it to everyone!!)
+	no action
+bitfield (see Note A)
+	no action
+request (after receiving 'unchoke' or a piece and after checking 'requests in flight' list for piece to request, request-piece-request-piece)
+	update 'requests in flight' list
+piece (after getting 'request')
+	no action
+handshake (see note A)
+	
+------------------------
+**Ashton has more detail on this
+initialize() //read in cfg's and setup
+handshake() //shake hands w/ everyone that's already in then handle messages
+handle_messages()
+	case			/*in each case, do nothing, call a function to send message or just do action(not sending msg) if few actions */
+		'choke'
+			
+		'unchoke'
+		[etc]
+	end case;
+	
+	
