@@ -38,11 +38,24 @@ public class peerProcess {
 
 	// dictionary for peerID::peerData mapping
 	// used to store all peer-specific information
+	// http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
 	private Map peerDict = new Map();
 
 	public static void main(String [] args) {
-		//this.peerId = args[0];
-			//exception handle?
+		try {
+    		args.get(0);
+		} catch (IndexOutOfBoundsException e) {
+    		print("Please pass in a PeerID!");
+    		exit(1);
+		}
+		/*initialize();
+		while(true){
+			//for each peer:
+			//implement as for-each loop on peerDict
+				//http://www.javapractices.com/topic/TopicAction.do?Id=196
+			//for(PeerData peer : peerDict){};
+				handle_message();
+		}*/
 	}
 
 
@@ -56,8 +69,4 @@ public class peerProcess {
 			// parse!
 		}
 	}
-
-
-
-
 }
