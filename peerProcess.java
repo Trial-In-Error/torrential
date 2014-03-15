@@ -235,27 +235,29 @@ public class peerProcess {
 	{
 		interestingList.remove(localPeerID);
 	}
+
+	public void addSender(int sPeerID)
+	{
+		senderList.add(sPeerID);
+	}
+
+	public void removeSender(int sPeerID)
+	{
+		senderList.remove(sPeerID);
+	}
 	
-
 	public void updateBitfield(/*sender's peerID*/) {
-		
-
+		//work
 	}
 	
 	public void updateMyBitfield() {
-	
+		//work
 	}
 	
 	public void updateInteresting(/*sender's peerID*/) {
 		Bitfield theirs = peerDict(peerID).bitfield;
 		//compare personal bitfield and sender's bitfield
 		//set sender's interesting variable to true or false
-	}
-	public void addSender(int sPeerID) {
-		senderList.add(sPeerID);
-	}
-	public void removeSender(int sPeerID) {
-		senderList.remove(sPeerID);
 	}
 
 	private void sendChoke(int localPID)
