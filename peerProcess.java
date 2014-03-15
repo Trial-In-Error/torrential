@@ -1,3 +1,5 @@
+import java.io.*;
+
 public class peerProcess {
 // bitfield representing file pieces owned by this peer
 // needs every relevant bit set to zero!
