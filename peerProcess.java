@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.Scanner;
 
 public class peerProcess {
 	// bitfield representing file pieces owned by this peer
@@ -62,12 +63,57 @@ public class peerProcess {
 
 	public void initialize(int peerID) {
 
-		BufferedReader reader = new BufferedReader(
-					new FileReader("Common.cfg"));
-		String line = null;
-		while ((line = reader.readLine()) != null) {
-			// parse!
+		File file = new File("Common.cfg");
+		File file = new File("PeerInfo.cfg");
+		try {
+			Scanner scanner = new Scanner(file);
+			
+			scanner.next();
+			numberOfPrefferedNeighbors = scanner.next();
+			scanner.next();
+			unchokingInterval = scanner.next();
+			scanner.next();
+			optimisticUnchokingInterval = scanner.next();
+			scanner.next();
+			fileName = scanner.next();
+			scanner.next();
+			fileSize = scanner.next();
+			scanner.next();
+			pieceSize = scanner.next();
 		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		scanner.close();
+		
+		int peerID_Temp = 0;
+		String host_Temp = null;
+		int port_Temp = 0;
+		int hasFile_Temp = 0;
+		int i = 0;
+		
+		Scanner sc = new Scanner(file2);
+		try {
+			while (sc.hasNext()) {
+				
+				peerID_Temp = scanner.next();
+				host_Temp = scanner.next();
+				port_Temp = scanner.next();
+				hasFile_Temp = scanner.next();
+				
+				peerDict.put(peerID_Temp, peerData(peerID_Temp, host_Temp,
+													port_Temp, hasFile_Temp));
+													
+				
+			
+		
+			}
+		}
+		catch {
+			e.printStackTrace();
+		}
+		sc.close();
+		
 	}
 
 
