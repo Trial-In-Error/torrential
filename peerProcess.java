@@ -220,4 +220,49 @@ public class peerProcess {
 			default://exception
 		}
 	}//end handle_message
+
+	private void sendChoke(int localPID)
+	{
+		// send the choke message
+		self.neighborList.remove(localPID);
+	}
+
+	private void sendUnchoke(int localPID)
+	{
+		// send the unChoke message
+		self.neighborList.add(localPID);
+	}
+
+	private void sendInterested(int localPID)
+	{
+		// send the interested message
+		self.updateInteresting();
+	}
+
+	private void sendNotInterested(int localPID)
+	{
+		// send the notInterested message
+		self.interestedList.remove(localPID);
+	}
+
+	private void sendHave(int localPID)
+	{
+		// send the have message
+	}
+
+	private void sendBitfield(int localPID)
+	{
+		// send the bitfield
+	}
+
+	private void sendRequest(int localPID)
+	{
+		// send the request
+		// add request to 'requests in flight' list
+	}
+
+	private void sendPiece(int localPID)
+	{
+		// send the piece
+	}
 }
