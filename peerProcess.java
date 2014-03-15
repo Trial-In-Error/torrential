@@ -81,7 +81,7 @@ public class peerProcess extends peerData {
 		}*/
 	}
 
-	private void intialize() {
+	private void initialize() {
 		setupConstants();
 		setupConnections();
 	}
@@ -92,7 +92,6 @@ public class peerProcess extends peerData {
 		File file2 = new File("PeerInfo.cfg");
 		try {
 			Scanner scanner = new Scanner(file);
-			
 			scanner.next();
 			numberOfPreferredNeighbors = scanner.nextInt();
 			scanner.next();
@@ -116,10 +115,8 @@ public class peerProcess extends peerData {
 		String host_Temp = null;
 		int port_Temp = 0;
 		int hasFile_Temp = 0;
-		int i = 0;
-		
-		Scanner sc = new Scanner(file2);
 		try {
+			Scanner sc = new Scanner(file2);
 			while (sc.hasNext()) {
 				
 				peerID_Temp = sc.nextInt();
@@ -136,11 +133,12 @@ public class peerProcess extends peerData {
 				sc.close();
 			}
 		}
-		catch(FileNotFoundException e) {
-			e.printStackTrace();
+		catch(FileNotFoundException e)
+		{
+			System.err.println("Error: " + e.getMessage());
+			System.exit(1);
+		
 		}
-		
-		
 	}
 	
 	private void setupDirectory(int ID) {
@@ -169,11 +167,14 @@ public class peerProcess extends peerData {
 	public void handleMessage(/*pass in message*/) {
 	//actions in response to receiving message
 	//unpack message and get msg type, here, assume type is int
-	
-	int senderPeerID = 0;
-	int stub = 0;
-	
-		int messageType, interestStatus;
+		// STUBS FOR COMPILATION PURPOSES
+		int messageType = 0;
+		int interestStatus = 0;
+
+
+		int senderPeerID = 0;
+		int stub = 0;
+		
 		//msg_type = extract from message
 		switch (messageType) {
 			//bitfield
@@ -222,8 +223,8 @@ public class peerProcess extends peerData {
 				sendHave();	//method will send to all peers
 				peerDict.get(senderPeerID).messagesSinceLastRound++;
 				updateInteresting(senderPeerID);
-				removeRequestsInFlight();
-				checkCompletion;
+				removeRequestsInFlight(senderPeerID);
+				checkCompletion();
 				break;
 			default://exception
 		}
@@ -260,7 +261,7 @@ public class peerProcess extends peerData {
 		senderList.remove(sPeerID);
 	}
 	
-	public void updateBitfield(int sender's peerID) {
+	public void updateBitfield(int senderPeerID) {
 		//work
 	}
 	
@@ -268,7 +269,7 @@ public class peerProcess extends peerData {
 		//work
 	}
 	
-	public void updateInteresting(int senderPeerID) {
+	public void updateInteresting(int senderPeerID /*sender's bitfield*/) {
 		BitSet theirs = this.peerDict.get(senderPeerID).bitfield;
 		//compare personal bitfield and sender's bitfield
 		//set sender's interesting variable to true or false
@@ -289,7 +290,7 @@ public class peerProcess extends peerData {
 	private void sendInterested(int localPID)
 	{
 		// send the interested message
-		this.updateInteresting();
+		this.updateInteresting(localPID);
 	}
 
 	private void sendNotInterested(int localPID)
@@ -338,9 +339,12 @@ public class peerProcess extends peerData {
 	{
 		// less dark bit-wise magic than before
 		// if NOT(bitfield) has no 1's, then bitfield has no 0's
-		tempSize = this.internalBitfield.size()
-		if(this.internalBitfield.flip(0, tempSize-1).isEmpty()
-			&& this.internalBitfield.size() == this.numberOfPieces)
+		int tempSize = this.internalBitfield.size();
+		BitSet tempBitfield = new BitSet(tempSize);
+		tempBitfield = (BitSet) internalBitfield.clone();
+		tempBitfield.flip(0, tempSize-1);
+		if(tempBitfield.isEmpty()
+			&& tempBitfield.size() == this.numberOfPieces)
 		{
 			this.fileComplete = true;
 		}else{
