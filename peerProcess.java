@@ -77,7 +77,6 @@ public class peerProcess {
 		}*/
 	}
 
-
 	private void intialize() {
 		setupConstants();
 		setupConnections();
