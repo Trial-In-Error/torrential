@@ -59,7 +59,10 @@ public class peerProcess extends peerData {
 	private LinkedList neighborList = new LinkedList();
 
 	// list of all requests for data in-flight
-	private LinkedList RequestsInFlight = new LinkedList();
+	private LinkedList requestsInFlight = new LinkedList();
+
+	// THIS NEEDS SET ACCURATELY, DEAR GOD
+	int numberOfPieces = 0;
 
 	public static void main(String [] args) {
 		try {
@@ -176,7 +179,7 @@ public class peerProcess extends peerData {
 			//bitfield
 			case 1:	updateBitfield(senderPeerID /*Pass a bitfield as well*/);
 				updateInteresting(senderPeerID);
-				if (getInteresting(senderPeerID)) 
+				if (interestingList.contains(senderPeerID))
 					sendInterested(senderPeerID);
 				else
 					sendNotInterested(senderPeerID);
@@ -212,15 +215,15 @@ public class peerProcess extends peerData {
 				}
 				break;
 			//request
-			case 7:	sendPiece(stub /* fix later */);
+			case 7:	sendPiece(senderPeerID /* fix later */);
 				break;
 			//piece
 			case 8:	updateMyBitfield();
 				sendHave();	//method will send to all peers
-				incMsgReceived();
+				peerDict.get(senderPeerID).messagesSinceLastRound++;
 				updateInteresting(senderPeerID);
 				removeRequestsInFlight();
-				checkCompletion();
+				checkCompletion;
 				break;
 			default://exception
 		}
@@ -246,10 +249,6 @@ public class peerProcess extends peerData {
 		interestingList.remove(localPeerID);
 	}
 
-
-	public void updateBitfield(int localPeerID /*Pass a bitfield as well*/) {
-		
-	}
 	public void addSender(int sPeerID)
 	{
 		senderList.add(sPeerID);
@@ -261,7 +260,7 @@ public class peerProcess extends peerData {
 		senderList.remove(sPeerID);
 	}
 	
-	public void updateBitfield(/*sender's peerID*/) {
+	public void updateBitfield(int sender's peerID) {
 		//work
 	}
 	
@@ -327,7 +326,25 @@ public class peerProcess extends peerData {
 		temp.initiatedHandshake = true;
 		// send the handshake
 	}
+
+	private void removeRequestsInFlight(int localPID)
+	{
+		// note: requestsInFlight does not yet support timing;
+		// need a new class to store that encapsulates PID/time.
+		this.requestsInFlight.remove(localPID);
+	}
+
+	private void checkCompletion()
+	{
+		// less dark bit-wise magic than before
+		// if NOT(bitfield) has no 1's, then bitfield has no 0's
+		tempSize = this.internalBitfield.size()
+		if(this.internalBitfield.flip(0, tempSize-1).isEmpty()
+			&& this.internalBitfield.size() == this.numberOfPieces)
+		{
+			this.fileComplete = true;
+		}else{
+			this.fileComplete = false;
+		}
+	}
 }
-
-
-
