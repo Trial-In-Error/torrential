@@ -79,7 +79,7 @@ public class peerProcess {
 		//bitfield
 		case 1:	updateBitfield(/*sender's peerID*/);
 			updateInteresting(/*something*/);
-			if ( ) 
+			if (getInteresting(/*sender's peerID*/) 
 				sendInterested();
 			else
 				sendNotInterested();
