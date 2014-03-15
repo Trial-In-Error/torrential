@@ -77,8 +77,7 @@ public class peerProcess {
 		}*/
 	}
 
-	private void 
-
+	
 	public void initialize(int peerID) {
 
 		File file = new File("Common.cfg");
@@ -210,62 +209,28 @@ public class peerProcess {
 	{
 		interestingList.remove(localPeerID);
 	}
+	
 
-	public void handleMessage(/*pass in message*/) {
-		//actions in response to receiving message
-		//unpack message and get msg type, here, assume type is int
+	public void updateBitfield(/*sender's peerID*/) {
 		
-		int messageType, interestStatus;
-		//messageType = extract from message
-		switch (messageType) {
-			//bitfield
-			case 1:	updateBitfield(/*sender's peerID*/);
-				updateInteresting(/*something*/);
-				if (/*huh?*/) 
-					sendInterested();
-				else
-					sendNotInterested();
-				break;
-			//choke
-			case 2:	removeSender();
-				break;
-			//unchoke
-			case 3:	addSender();
-				sendRequest(/*sender's peerID*/);
-				break;
-			//interested
-			case 4:	addInterested();
-				break;
-			//not interested
-			case 5:	removeInterested();
-			//have
-			case 6:	updateBitfield(/*sender's peerID*/);
-				interestStatus = get_interest_status(); //
-				switch (interestStatus) {
-					//sender was interesting and still is
-					case 1:	sendInterested();
-						break;
-					//sender was not interesting and now is
-					case 2:	sendInterested();
-						addInteresting();
-						break;
-					//sender remains uninteresting
-					case 3:	break;
-					default: //exception
-				}
-				break;
-			//request
-			case 7:	sendPiece(/*piece index*/);
-				break;
-			//piece
-			case 8:	updateMyBitfield();
-				sendHave();	//method will send to all peers
-				incMsgReceived();
-				updateInteresting();
-				removeRequestsInFlight();
-				checkCompletion();
-				break;
-			default://exception
-		}
-	}//end handle_message
+	}
+	
+	public void updateMyBitfield() {
+	
+	}
+	
+	public void updateInteresting(/*sender's peerID*/) {
+		Bitfield theirs = peerDict(peerID).bitfield;
+		//compare personal bitfield and sender's bitfield
+		//set sender's interesting variable to true or false
+	}
+	public void addSender(int sPeerID) {
+		senderList.add(sPeerID);
+	}
+	public void removeSender(int sPeerID) {
+		senderList.remove(sPeerID);
+	}
 }
+
+
+
