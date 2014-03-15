@@ -86,14 +86,61 @@ public class peerProcess {
 		}
 	}
 
-	private void addSender(int localPeerID)
-	{
-		senderList.add(localPeerID);
-	}
-
-	private void removeSender(int localPeerID)
-	{
-		senderList.remove(localPeerID);
+	public void handleMessage(/*pass in message*/) {
+	//actions in response to receiving message
+	//unpack message and get msg type, here, assume type is int
+	
+	int messageType, interestStatus;
+	//msg_type = extract from message
+	switch (messageType) {
+		//bitfield
+		case 1:	updateBitfield(/*sender's peerID*/);
+			updateInteresting(/*something*/);
+			if (getInteresting(/*sender's peerID*/) 
+				sendInterested();
+			else
+				sendNotInterested();
+			break;
+		//choke
+		case 2:	removeSender();
+			break;
+		//unchoke
+		case 3:	addSender();
+			sendRequest(/*sender's peerID*/);
+			break;
+		//interested
+		case 4:	addInterested();
+			break;
+		//not interested
+		case 5:	removeInterested();
+		//have
+		case 6:	updateBitfield(/*sender's peerID*/);
+			interestStatus = get_interest_status(); //
+			switch (interestStatus) {
+				//sender was interesting and still is
+				case 1:	sendInterested();
+					break;
+				//sender was not interesting and now is
+				case 2:	sendInterested();
+					addInteresting();
+					break;
+				//sender remains uninteresting
+				case 3:	break;
+				default: //exception
+			}
+			break;
+		//request
+		case 7:	sendPiece(/*piece index*/);
+			break;
+		//piece
+		case 8:	updateMyBitfield();
+			sendHave();	//method will send to all peers
+			incMsgReceived();
+			updateInteresting();
+			removeRequestsInFlight();
+			checkCompletion();
+			break;
+		default://exception
 	}
 
 	private void addInterested(int localPeerID)
