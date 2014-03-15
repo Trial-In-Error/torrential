@@ -4,6 +4,7 @@ public class peerData {
 	public Socket socket;
 	public int portNumber;
 	public String hostName;
+	public boolean initiatedHandshake = false;
 	
 	// these are likely duplicated elsewhere or unnecessary,
 	// included here and now for completeness

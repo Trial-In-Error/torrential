@@ -211,7 +211,7 @@ public class peerProcess {
 		interestingList.remove(localPeerID);
 	}
 
-	public void handleMessage(/*pass in message*/) {
+	public void handleMessage(int localPID) {
 		//actions in response to receiving message
 		//unpack message and get msg type, here, assume type is int
 		
@@ -219,9 +219,9 @@ public class peerProcess {
 		//messageType = extract from message
 		switch (messageType) {
 			//bitfield
-			case 1:	updateBitfield(/*sender's peerID*/);
-				updateInteresting(/*something*/);
-				if (/*huh?*/) 
+			case 1:	updateBitfield(localPID);
+				updateInteresting(localPID);
+				if (peerDict(localPID).interesting) 
 					sendInterested();
 				else
 					sendNotInterested();
@@ -312,5 +312,11 @@ public class peerProcess {
 	private void sendPiece(int localPID)
 	{
 		// send the piece
+	}
+
+	private void doSend(int localPID, int messageType, byte[] payload)
+	{
+		// construct and pack the message
+		// send the message
 	}
 }
