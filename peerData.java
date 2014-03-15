@@ -1,7 +1,10 @@
+import java.util.*;
+
+
 public class peerData {
-	public Bitfield bitfield = new Bitfield();
+	public BitSet bitfield;
 	public int messagesSinceLastRound;
-	public Socket socket;
+	//public Socket socket;
 	public int portNumber;
 	public String hostName;
 	public boolean initiatedHandshake;
@@ -16,11 +19,36 @@ public class peerData {
 	public boolean isOptimisticallyUnchoked;
 	public boolean isSender;
 	
-	public peerData(peerID, hostName, portNumber, hasFile) {
+	public peerData(int peerID, String hostName, int portNumber, int hasFile) {
 		this.ID = peerID;
 		this.hostName = hostName;
 		this.portNumber = portNumber;
 		this.hasFile = hasFile;
+		this.isInterested = false;
+		this.isInteresting = false;
+		this.isChoked = true;
+		this.isOptimisticallyUnchoked = false;
+		this.isSender = false;
+		this.initiatedHandshake = false;
+		this.messagesSinceLastRound = 0;
+		this.bitfield = new BitSet();
+	}
+	
+	public peerData() {
+		this.ID = 0;
+		this.hostName = null;
+		this.portNumber = 0;
+		this.hasFile = 0;
+		this.isInterested = false;
+		this.isInteresting = false;
+		this.isChoked = true;
+		this.isOptimisticallyUnchoked = false;
+		this.isSender = false;
+		this.initiatedHandshake = false;
+		this.messagesSinceLastRound = 0;
+		this.bitfield = new BitSet();
+		
+		
 	}
 	
 	

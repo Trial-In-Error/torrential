@@ -1,11 +1,11 @@
 import java.io.*;
 import java.util.*;
 
-public class peerProcess {
+public class peerProcess extends peerData {
 	// bitfield representing file pieces owned by this peer
 	// needs every relevant bit set to zero!
 	// http://docs.oracle.com/cd/E16162_01/apirefs.1112/e17493/oracle/ide/util/BitField.html
-	private Bitfield internalBitfield = new Bitfield();
+	private BitSet internalBitfield = new BitSet();
 
 	// does this peer have the file completed?
 	// needs set to true in the true case in setup!
@@ -43,7 +43,7 @@ public class peerProcess {
 	// dictionary for peerID::peerData mapping
 	// used to store all peer-specific information
 	// http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
-	private HashMap peerDict = new HashMap();
+	private HashMap<Integer, peerData> peerDict = new HashMap<Integer, peerData>();
 
 	// list of all peers known to have interesting pieces
 	// http://docs.oracle.com/javase/7/docs/api/java/util/LinkedList.html
@@ -126,8 +126,10 @@ public class peerProcess {
 				
 				setupDirectory(peerID_Temp);
 				setupLogFiles(peerID_Temp);
-				this.peerDict.put(peerID_Temp, peerData(peerID_Temp, host_Temp,
-													port_Temp, hasFile_Temp));
+				
+				peerData tempObject = new peerData(peerID_Temp, host_Temp,
+													port_Temp, hasFile_Temp);
+				this.peerDict.put(peerID_Temp, tempObject);
 				sc.close();
 			}
 		}
@@ -268,7 +270,7 @@ public class peerProcess {
 	}
 	
 	public void updateInteresting(int senderPeerID) {
-		Bitfield theirs = this.peerDict.get(senderPeerID).bitfield;
+		BitSet theirs = this.peerDict.get(senderPeerID).bitfield;
 		//compare personal bitfield and sender's bitfield
 		//set sender's interesting variable to true or false
 	}
@@ -321,7 +323,8 @@ public class peerProcess {
 
 	private void sendHandshake(int localPID)
 	{
-		peerDict(localPID).initiatedHandshake = true;
+		peerData temp = peerDict.get(localPID);
+		temp.initiatedHandshake = true;
 		// send the handshake
 	}
 }
