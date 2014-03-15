@@ -1,5 +1,5 @@
 import java.io.*;
-import java.util.Scanner;
+import java.util.*;
 
 public class peerProcess {
 	// bitfield representing file pieces owned by this peer
@@ -37,12 +37,13 @@ public class peerProcess {
 
 	// identifier for this peer; found in PeerInfo.cfg
 	// needs set to correct value!
-	private int peerID = 0;
+	// check static requirement
+	private static int peerID = 0;
 
 	// dictionary for peerID::peerData mapping
 	// used to store all peer-specific information
 	// http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
-	private Map peerDict = new Map();
+	private HashMap peerDict = new HashMap();
 
 	// list of all peers known to have interesting pieces
 	// http://docs.oracle.com/javase/7/docs/api/java/util/LinkedList.html
@@ -62,10 +63,10 @@ public class peerProcess {
 
 	public static void main(String [] args) {
 		try {
-    		args.get(0);
+    		peerID = Integer.parseInt(args[0]);
 		} catch (IndexOutOfBoundsException e) {
-    		print("Please pass in a PeerID!");
-    		exit(1);
+    		System.out.println("Please pass in a PeerID!");
+    		System.exit(1);
 		}
 		/*initialize();
 		while(true){
@@ -82,30 +83,31 @@ public class peerProcess {
 		setupConnections();
 	}
 
-	public void setupConstants(int peerID) {
+	public void setupConstants() {
 
 		File file = new File("Common.cfg");
-		File file = new File("PeerInfo.cfg");
+		File file2 = new File("PeerInfo.cfg");
 		try {
 			Scanner scanner = new Scanner(file);
 			
 			scanner.next();
-			numberOfPrefferedNeighbors = scanner.next();
+			numberOfPreferredNeighbors = scanner.nextInt();
 			scanner.next();
-			unchokingInterval = scanner.next();
+			unchokingInterval = scanner.nextInt();
 			scanner.next();
-			optimisticUnchokingInterval = scanner.next();
+			optimisticUnchokingInterval = scanner.nextInt();
 			scanner.next();
 			fileName = scanner.next();
 			scanner.next();
-			fileSize = scanner.next();
+			fileSize = scanner.nextInt();
 			scanner.next();
-			pieceSize = scanner.next();
+			pieceSize = scanner.nextInt();
+			scanner.close();
 		}
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		scanner.close();
+		
 		
 		int peerID_Temp = 0;
 		String host_Temp = null;
@@ -117,31 +119,31 @@ public class peerProcess {
 		try {
 			while (sc.hasNext()) {
 				
-				peerID_Temp = scanner.next();
-				host_Temp = scanner.next();
-				port_Temp = scanner.next();
-				hasFile_Temp = scanner.next();
+				peerID_Temp = sc.nextInt();
+				host_Temp = sc.next();
+				port_Temp = sc.nextInt();
+				hasFile_Temp = sc.nextInt();
 				
 				setupDirectory(peerID_Temp);
 				setupLogFiles(peerID_Temp);
-				peerDict.put(peerID_Temp, peerData(peerID_Temp, host_Temp,
+				this.peerDict.put(peerID_Temp, peerData(peerID_Temp, host_Temp,
 													port_Temp, hasFile_Temp));
-				
+				sc.close();
 			}
 		}
 		catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		sc.close();
+		
 		
 	}
 	
-	private void setupDirectory(ID) {
+	private void setupDirectory(int ID) {
 		File dir = new File("/peer_[ID]");
 		dir.mkdir();
 	}
 	
-	private void setupLogFiles(ID) {
+	private void setupLogFiles(int ID) {
 		try {
 			FileWriter fstream = new FileWriter("log_peer_[ID].log");
 			BufferedWriter out = new BufferedWriter(fstream);
@@ -149,7 +151,7 @@ public class peerProcess {
 			out.close();
 		}
 		catch(Exception e) {
-			system.err.println("Error: " + e.getMessage());
+			System.err.println("Error: " + e.getMessage());
 		}
 	}
 	
@@ -163,39 +165,44 @@ public class peerProcess {
 	//actions in response to receiving message
 	//unpack message and get msg type, here, assume type is int
 	
+	int senderPeerID = 0;
+	int stub = 0;
+	
 		int messageType, interestStatus;
 		//msg_type = extract from message
 		switch (messageType) {
 			//bitfield
-			case 1:	updateBitfield(/*sender's peerID*/);
-				updateInteresting(/*something*/);
-				if (getInteresting(/*sender's peerID*/) 
-					sendInterested();
+			case 1:	updateBitfield(senderPeerID /*Pass a bitfield as well*/);
+				updateInteresting(senderPeerID);
+				if (getInteresting(senderPeerID)) 
+					sendInterested(senderPeerID);
 				else
-					sendNotInterested();
+					sendNotInterested(senderPeerID);
 				break;
 			//choke
-			case 2:	removeSender();
+			case 2:	removeSender(senderPeerID);
 				break;
 			//unchoke
-			case 3:	addSender();
-				sendRequest(/*sender's peerID*/);
+			case 3:	addSender(senderPeerID);
+				sendRequest(senderPeerID);
 				break;
 			//interested
-			case 4:	addInterested();
+			case 4:	addInterested(senderPeerID);
 				break;
 			//not interested
-			case 5:	removeInterested();
+			case 5:	removeInterested(senderPeerID);
 			//have
-			case 6:	updateBitfield(/*sender's peerID*/);
-				interestStatus = get_interest_status(); //
+			case 6:	updateBitfield(senderPeerID);
+				// is this REALLY a case of updateInteresting?
+				// it was "interestStatus = get_interest_status" before
+				 updateInteresting(senderPeerID);
 				switch (interestStatus) {
 					//sender was interesting and still is
-					case 1:	sendInterested();
+					case 1:	sendInterested(senderPeerID);
 						break;
 					//sender was not interesting and now is
-					case 2:	sendInterested();
-						addInteresting();
+					case 2:	sendInterested(senderPeerID);
+						addInteresting(senderPeerID);
 						break;
 					//sender remains uninteresting
 					case 3:	break;
@@ -203,18 +210,19 @@ public class peerProcess {
 				}
 				break;
 			//request
-			case 7:	sendPiece(/*piece index*/);
+			case 7:	sendPiece(stub /* fix later */);
 				break;
 			//piece
 			case 8:	updateMyBitfield();
 				sendHave();	//method will send to all peers
 				incMsgReceived();
-				updateInteresting();
+				updateInteresting(senderPeerID);
 				removeRequestsInFlight();
 				checkCompletion();
 				break;
 			default://exception
 		}
+	}
 
 	private void addInterested(int localPeerID)
 	{
@@ -237,7 +245,7 @@ public class peerProcess {
 	}
 	
 
-	public void updateBitfield(/*sender's peerID*/) {
+	public void updateBitfield(int localPeerID /*Pass a bitfield as well*/) {
 		
 
 	}
@@ -246,8 +254,8 @@ public class peerProcess {
 	
 	}
 	
-	public void updateInteresting(/*sender's peerID*/) {
-		Bitfield theirs = peerDict(peerID).bitfield;
+	public void updateInteresting(int senderPeerID) {
+		Bitfield theirs = this.peerDict.get(senderPeerID).bitfield;
 		//compare personal bitfield and sender's bitfield
 		//set sender's interesting variable to true or false
 	}
@@ -261,28 +269,28 @@ public class peerProcess {
 	private void sendChoke(int localPID)
 	{
 		// send the choke message
-		self.neighborList.remove(localPID);
+		this.neighborList.remove(localPID);
 	}
 
 	private void sendUnchoke(int localPID)
 	{
 		// send the unChoke message
-		self.neighborList.add(localPID);
+		this.neighborList.add(localPID);
 	}
 
 	private void sendInterested(int localPID)
 	{
 		// send the interested message
-		self.updateInteresting();
+		this.updateInteresting();
 	}
 
 	private void sendNotInterested(int localPID)
 	{
 		// send the notInterested message
-		self.interestedList.remove(localPID);
+		this.interestedList.remove(localPID);
 	}
 
-	private void sendHave(int localPID)
+	private void sendHave()
 	{
 		// send the have message
 	}
