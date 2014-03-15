@@ -137,107 +137,13 @@ public class peerProcess {
 	//actions in response to receiving message
 	//unpack message and get msg type, here, assume type is int
 	
-	int messageType, interestStatus;
-	//msg_type = extract from message
-	switch (messageType) {
-		//bitfield
-		case 1:	updateBitfield(/*sender's peerID*/);
-			updateInteresting(/*something*/);
-			if (getInteresting(/*sender's peerID*/) 
-				sendInterested();
-			else
-				sendNotInterested();
-			break;
-		//choke
-		case 2:	removeSender();
-			break;
-		//unchoke
-		case 3:	addSender();
-			sendRequest(/*sender's peerID*/);
-			break;
-		//interested
-		case 4:	addInterested();
-			break;
-		//not interested
-		case 5:	removeInterested();
-		//have
-		case 6:	updateBitfield(/*sender's peerID*/);
-			interestStatus = get_interest_status(); //
-			switch (interestStatus) {
-				//sender was interesting and still is
-				case 1:	sendInterested();
-					break;
-				//sender was not interesting and now is
-				case 2:	sendInterested();
-					addInteresting();
-					break;
-				//sender remains uninteresting
-				case 3:	break;
-				default: //exception
-			}
-			break;
-		//request
-		case 7:	sendPiece(/*piece index*/);
-			break;
-		//piece
-		case 8:	updateMyBitfield();
-			sendHave();	//method will send to all peers
-			incMsgReceived();
-			updateInteresting();
-			removeRequestsInFlight();
-			checkCompletion();
-			break;
-		default://exception
-	}
-
-	private void addInterested(int localPeerID)
-	{
-		interestedList.add(localPeerID);
-	}
-
-	private void removeInterested(int localPeerID)
-	{
-		interestedList.remove(localPeerID);
-	}
-
-	private void addInteresting(int localPeerID)
-	{
-		interestingList.add(localPeerID);
-	}
-
-	private void removeInteresting(int localPeerID)
-	{
-		interestingList.remove(localPeerID);
-	}
-	
-
-	public void updateBitfield(/*sender's peerID*/) {
-		
-<<<<<<< HEAD
-	}
-	
-	public void updateMyBitfield() {
-	
-	}
-	
-	public void updateInteresting(/*sender's peerID*/) {
-		Bitfield theirs = peerDict(peerID).bitfield;
-		//compare personal bitfield and sender's bitfield
-		//set sender's interesting variable to true or false
-	}
-	public void addSender(int sPeerID) {
-		senderList.add(sPeerID);
-	}
-	public void removeSender(int sPeerID) {
-		senderList.remove(sPeerID);
-=======
 		int messageType, interestStatus;
-		//messageType = extract from message
+		//msg_type = extract from message
 		switch (messageType) {
 			//bitfield
 			case 1:	updateBitfield(/*sender's peerID*/);
 				updateInteresting(/*something*/);
-				if (/*huh?*/) 
+				if (getInteresting(/*sender's peerID*/) 
 					sendInterested();
 				else
 					sendNotInterested();
@@ -283,7 +189,48 @@ public class peerProcess {
 				break;
 			default://exception
 		}
-	}//end handle_message
+
+	private void addInterested(int localPeerID)
+	{
+		interestedList.add(localPeerID);
+	}
+
+	private void removeInterested(int localPeerID)
+	{
+		interestedList.remove(localPeerID);
+	}
+
+	private void addInteresting(int localPeerID)
+	{
+		interestingList.add(localPeerID);
+	}
+
+	private void removeInteresting(int localPeerID)
+	{
+		interestingList.remove(localPeerID);
+	}
+	
+
+	public void updateBitfield(/*sender's peerID*/) {
+		
+
+	}
+	
+	public void updateMyBitfield() {
+	
+	}
+	
+	public void updateInteresting(/*sender's peerID*/) {
+		Bitfield theirs = peerDict(peerID).bitfield;
+		//compare personal bitfield and sender's bitfield
+		//set sender's interesting variable to true or false
+	}
+	public void addSender(int sPeerID) {
+		senderList.add(sPeerID);
+	}
+	public void removeSender(int sPeerID) {
+		senderList.remove(sPeerID);
+	}
 
 	private void sendChoke(int localPID)
 	{
@@ -328,7 +275,7 @@ public class peerProcess {
 	private void sendPiece(int localPID)
 	{
 		// send the piece
->>>>>>> d2f6efa9ea725afe3987125663f503b55871d447
+
 	}
 }
 
