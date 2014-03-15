@@ -41,7 +41,8 @@ have ()
 			no action
 bitfield (see note A)
 	update local copy of sender's bitfield
-	update interesting list
+	update interesting list (compare personal bitfield and sender's bitfield)
+	getInteresting(peerID)
 	send 'interested' or 'not interested'
 request (sent 'unchoke' or a piece)
 	send 'piece'
