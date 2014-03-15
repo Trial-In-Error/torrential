@@ -319,7 +319,7 @@ public class peerProcess {
 
 	}
 
-	private sendHandshake(int localPID)
+	private void sendHandshake(int localPID)
 	{
 		peerDict(localPID).initiatedHandshake = true;
 		// send the handshake
