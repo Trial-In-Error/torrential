@@ -213,6 +213,7 @@ public class peerProcess {
 
 	public void updateBitfield(/*sender's peerID*/) {
 		
+<<<<<<< HEAD
 	}
 	
 	public void updateMyBitfield() {
@@ -229,6 +230,105 @@ public class peerProcess {
 	}
 	public void removeSender(int sPeerID) {
 		senderList.remove(sPeerID);
+=======
+		int messageType, interestStatus;
+		//messageType = extract from message
+		switch (messageType) {
+			//bitfield
+			case 1:	updateBitfield(/*sender's peerID*/);
+				updateInteresting(/*something*/);
+				if (/*huh?*/) 
+					sendInterested();
+				else
+					sendNotInterested();
+				break;
+			//choke
+			case 2:	removeSender();
+				break;
+			//unchoke
+			case 3:	addSender();
+				sendRequest(/*sender's peerID*/);
+				break;
+			//interested
+			case 4:	addInterested();
+				break;
+			//not interested
+			case 5:	removeInterested();
+			//have
+			case 6:	updateBitfield(/*sender's peerID*/);
+				interestStatus = get_interest_status(); //
+				switch (interestStatus) {
+					//sender was interesting and still is
+					case 1:	sendInterested();
+						break;
+					//sender was not interesting and now is
+					case 2:	sendInterested();
+						addInteresting();
+						break;
+					//sender remains uninteresting
+					case 3:	break;
+					default: //exception
+				}
+				break;
+			//request
+			case 7:	sendPiece(/*piece index*/);
+				break;
+			//piece
+			case 8:	updateMyBitfield();
+				sendHave();	//method will send to all peers
+				incMsgReceived();
+				updateInteresting();
+				removeRequestsInFlight();
+				checkCompletion();
+				break;
+			default://exception
+		}
+	}//end handle_message
+
+	private void sendChoke(int localPID)
+	{
+		// send the choke message
+		self.neighborList.remove(localPID);
+	}
+
+	private void sendUnchoke(int localPID)
+	{
+		// send the unChoke message
+		self.neighborList.add(localPID);
+	}
+
+	private void sendInterested(int localPID)
+	{
+		// send the interested message
+		self.updateInteresting();
+	}
+
+	private void sendNotInterested(int localPID)
+	{
+		// send the notInterested message
+		self.interestedList.remove(localPID);
+	}
+
+	private void sendHave(int localPID)
+	{
+		// send the have message
+	}
+
+	private void sendBitfield(int localPID)
+	{
+		// send the bitfield
+	}
+
+	private void sendRequest(int localPID)
+	{
+		// send the request
+		// add request to 'requests in flight' list
+	}
+
+	private void sendPiece(int localPID)
+	{
+		// send the piece
+>>>>>>> d2f6efa9ea725afe3987125663f503b55871d447
 	}
 }
 
