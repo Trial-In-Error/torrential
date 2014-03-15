@@ -1,0 +1,6 @@
+# Ignore compiled Java bytecode
+*.class
+
+# Ignore sublime generated files
+*.sublime-project
+*.sublime-workspace
