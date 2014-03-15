@@ -69,7 +69,7 @@ public class peerProcess {
 	}
 
 
-public void handleMessage(/*pass in message*/) {
+	public void handleMessage(/*pass in message*/) {
 	//actions in response to receiving message
 	//unpack message and get msg type, here, assume type is int
 	
