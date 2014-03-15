@@ -41,6 +41,22 @@ public class peerProcess {
 	// http://docs.oracle.com/javase/7/docs/api/java/util/Map.html
 	private Map peerDict = new Map();
 
+	// list of all peers known to have interesting pieces
+	// http://docs.oracle.com/javase/7/docs/api/java/util/LinkedList.html
+	private LinkedList interestedList = new LinkedList();
+
+	// list of all peers known to be interested in our pieces
+	private LinkedList interestingList = new LinkedList();
+
+	// list of all peers sending us data
+	private LinkedList senderList = new LinkedList();
+
+	// list of all peers we're sending data to (preferred neighbors)
+	private LinkedList neighborList = new LinkedList();
+
+	// list of all requests for data in-flight
+	private LinkedList RequestsInFlight = new LinkedList();
+
 	public static void main(String [] args) {
 		try {
     		args.get(0);
@@ -58,6 +74,8 @@ public class peerProcess {
 		}*/
 	}
 
+	private void 
+
 	public void initialize(int peerID) {
 
 		BufferedReader reader = new BufferedReader(
@@ -68,64 +86,91 @@ public class peerProcess {
 		}
 	}
 
+	private void addSender(int localPeerID)
+	{
+		senderList.add(localPeerID);
+	}
+
+	private void removeSender(int localPeerID)
+	{
+		senderList.remove(localPeerID);
+	}
+
+	private void addInterested(int localPeerID)
+	{
+		interestedList.add(localPeerID);
+	}
+
+	private void removeInterested(int localPeerID)
+	{
+		interestedList.remove(localPeerID);
+	}
+
+	private void addInteresting(int localPeerID)
+	{
+		interestingList.add(localPeerID);
+	}
+
+	private void removeInteresting(int localPeerID)
+	{
+		interestingList.remove(localPeerID);
+	}
 
 	public void handleMessage(/*pass in message*/) {
-	//actions in response to receiving message
-	//unpack message and get msg type, here, assume type is int
-	
-	int messageType, interestStatus;
-	//msg_type = extract from message
-	switch (messageType) {
-		//bitfield
-		case 1:	updateBitfield(/*sender's peerID*/);
-			updateInteresting(/*something*/);
-			if ( ) 
-				sendInterested();
-			else
-				sendNotInterested();
-			break;
-		//choke
-		case 2:	removeSender();
-			break;
-		//unchoke
-		case 3:	addSender();
-			sendRequest(/*sender's peerID*/);
-			break;
-		//interested
-		case 4:	addInterested();
-			break;
-		//not interested
-		case 5:	removeInterested();
-		//have
-		case 6:	updateBitfield(/*sender's peerID*/);
-			interestStatus = get_interest_status(); //
-			switch (interestStatus) {
-				//sender was interesting and still is
-				case 1:	sendInterested();
-					break;
-				//sender was not interesting and now is
-				case 2:	sendInterested();
-					addInteresting();
-					break;
-				//sender remains uninteresting
-				case 3:	break;
-				default: //exception
-			}
-			break;
-		//request
-		case 7:	sendPiece(/*piece index*/);
-			break;
-		//piece
-		case 8:	updateMyBitfield();
-			sendHave();	//method will send to all peers
-			incMsgReceived();
-			updateInteresting();
-			removeRequestsInFlight();
-			checkCompletion();
-			break;
-		default://exception
-	}
-}//end handle_message
-
+		//actions in response to receiving message
+		//unpack message and get msg type, here, assume type is int
+		
+		int messageType, interestStatus;
+		//messageType = extract from message
+		switch (messageType) {
+			//bitfield
+			case 1:	updateBitfield(/*sender's peerID*/);
+				updateInteresting(/*something*/);
+				if (/*huh?*/) 
+					sendInterested();
+				else
+					sendNotInterested();
+				break;
+			//choke
+			case 2:	removeSender();
+				break;
+			//unchoke
+			case 3:	addSender();
+				sendRequest(/*sender's peerID*/);
+				break;
+			//interested
+			case 4:	addInterested();
+				break;
+			//not interested
+			case 5:	removeInterested();
+			//have
+			case 6:	updateBitfield(/*sender's peerID*/);
+				interestStatus = get_interest_status(); //
+				switch (interestStatus) {
+					//sender was interesting and still is
+					case 1:	sendInterested();
+						break;
+					//sender was not interesting and now is
+					case 2:	sendInterested();
+						addInteresting();
+						break;
+					//sender remains uninteresting
+					case 3:	break;
+					default: //exception
+				}
+				break;
+			//request
+			case 7:	sendPiece(/*piece index*/);
+				break;
+			//piece
+			case 8:	updateMyBitfield();
+				sendHave();	//method will send to all peers
+				incMsgReceived();
+				updateInteresting();
+				removeRequestsInFlight();
+				checkCompletion();
+				break;
+			default://exception
+		}
+	}//end handle_message
 }
-
