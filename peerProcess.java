@@ -77,9 +77,12 @@ public class peerProcess {
 		}*/
 	}
 
-	private void 
+	private void intialize() {
+		setupConstants();
+		setupConnections();
+	}
 
-	public void initialize(int peerID) {
+	public void setupConstants(int peerID) {
 
 		File file = new File("Common.cfg");
 		File file = new File("PeerInfo.cfg");
@@ -119,19 +122,40 @@ public class peerProcess {
 				port_Temp = scanner.next();
 				hasFile_Temp = scanner.next();
 				
+				setupDirectory(peerID_Temp);
 				peerDict.put(peerID_Temp, peerData(peerID_Temp, host_Temp,
 													port_Temp, hasFile_Temp));
-													
 				
-			
-		
 			}
 		}
-		catch {
+		catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}
 		sc.close();
 		
+	}
+	
+	private void setupDirectory(ID) {
+		File dir = new File("/peer_[ID]");
+		dir.mkdir();
+	}
+	
+	private void setupLogFiles(ID) {
+		try {
+			FileWriter fstream = new FileWriter("log_peer_[ID].log");
+			BufferedWriter out = new BufferedWriter(fstream);
+			out.write("Log File for peer "+ID+" has been generated.");
+			out.close();
+		}
+		catch(Exception e) {
+			system.err.println("Error: " + e.getMessage());
+		}
+	}
+	
+	private void setupConnections() {
+	
+		//Fill in...
+	
 	}
 
 	public void handleMessage(/*pass in message*/) {
