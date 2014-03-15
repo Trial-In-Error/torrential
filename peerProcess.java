@@ -123,6 +123,7 @@ public class peerProcess {
 				hasFile_Temp = scanner.next();
 				
 				setupDirectory(peerID_Temp);
+				setupLogFiles(peerID_Temp);
 				peerDict.put(peerID_Temp, peerData(peerID_Temp, host_Temp,
 													port_Temp, hasFile_Temp));
 				
