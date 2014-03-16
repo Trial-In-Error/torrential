@@ -65,9 +65,9 @@ public class peerProcess extends peerData {
 	int numberOfPieces = 0;
 	
 	//file within peer process directory ../peer [peerID]/
-	private File f = new File("peer_"+myID);
+	private File f = new File("peer_"+String.valueOf(peerID));
 
-	private File file = new File(f, "log_peer_["+myID+"].log");
+	private File file = new File(f, "log_peer_["+String.valueOf(peerID)+"].log");
 
 	public static void main(String [] args) {
 		try {
@@ -399,7 +399,7 @@ public class peerProcess extends peerData {
 					break;
 				case 10: msg = "["+time+"]: "+"Peer ["+myID+"] has downloaded the piece ["+String.valueOf(piece)+"] from ["+lPID+"].";
 					break;*/
-				default: //exception
+				default: msg = "-1";//exception
 			}
 			bw.write(msg);
 			bw.close();
