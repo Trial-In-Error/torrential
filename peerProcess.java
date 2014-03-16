@@ -63,6 +63,11 @@ public class peerProcess extends peerData {
 
 	// THIS NEEDS SET ACCURATELY, DEAR GOD
 	int numberOfPieces = 0;
+	
+	//file within peer process directory ../peer [peerID]/
+	private File f = new File("peer_"+myID);
+
+	private File file = new File(f, "log_peer_["+myID+"].log");
 
 	public static void main(String [] args) {
 		try {
@@ -79,11 +84,21 @@ public class peerProcess extends peerData {
 			//for(PeerData peer : peerDict){};
 				handle_message();
 		}*/
+		
+		
+		
 	}
 
 	private void initialize() {
 		setupConstants();
 		setupConnections();
+		f.mkdirs();
+		try {
+			file.createNewFile();
+		}
+		catch (IOException e) {
+			e.printStackTrace();		
+		}
 	}
 
 	public void setupConstants() {
@@ -343,12 +358,62 @@ public class peerProcess extends peerData {
 		BitSet tempBitfield = new BitSet(tempSize);
 		tempBitfield = (BitSet) internalBitfield.clone();
 		tempBitfield.flip(0, tempSize-1);
-		if(tempBitfield.isEmpty()
-			&& tempBitfield.size() == this.numberOfPieces)
+		if(tempBitfield.isEmpty() && tempBitfield.size() == this.numberOfPieces)
 		{
 			this.fileComplete = true;
 		}else{
 			this.fileComplete = false;
 		}
 	}
+
+
+	private void log(int peerID, int localPID, int event, int piece) {
+		//write to logfile
+		String msg;
+		String lPID = String.valueOf(localPID);
+		String myID = String.valueOf(peerID);
+		GregorianCalendar cal = new GregorianCalendar();
+		
+		try {
+			
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+
+			switch (event) {
+				case 1:	msg = "["+String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf(cal.get(Calendar.SECOND))+"]: "+"Peer ["+myID+"] makes a connection to Peer ["+lPID+"].";
+					break;
+				case 2: msg =  "["+String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf(cal.get(Calendar.SECOND))+"]: "+"Peer ["+myID+"] is connected from ["+lPID+"].";
+					break;
+				/*case 3:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the preferred neighbors ["+neighborList+"].";
+					break;
+				case 4:	msg =  "["+time+"]: "+"Peer ["+myID+"] has the optimistically-unchoked neighbor ["+lPID+"].";
+					break;
+				case 5:	msg = "["+time+"]: "+"Peer ["+myID+"] is unchoked by ["+lPID+"].";
+					break;
+				case 6:	msg = "["+time+"]: "+"Peer ["+myID+"] is choked by ["+lPID+"]."; 
+					break;
+				case 7: msg = "["+time+"]: "+"Peer ["+myID+"] received a 'have' message from ["+lPID+"] for the piece["+String.valueOf(piece)+"].";
+					break;
+				case 8:	msg = "["+time+"]: "+"Peer ["+myID+"] receive an 'interested' message from ["+lPID+"].";
+					break;      	
+				case 9:	msg = "["+time+"]: "+"Peer ["+myID+"] received a 'not interested' message from ["+lPID+"].";
+					break;
+				case 10: msg = "["+time+"]: "+"Peer ["+myID+"] has downloaded the piece ["+String.valueOf(piece)+"] from ["+lPID+"].";
+					break;*/
+				default: //exception
+			}
+			bw.write(msg);
+			bw.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+			
+	}
+
+	/*time method gets compilation error when called ' error: non-static method time() cannot be referenced from a static context' if used in log() like--> String msg = "["+time()+"]";
+
+	private String time() {
+		GregorianCalendar cal = new GregorianCalendar();
+		return String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf	(cal.get(Calendar.SECOND));
+	}*/
 }
