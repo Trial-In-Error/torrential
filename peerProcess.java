@@ -242,8 +242,8 @@ public class peerProcess extends peerData {
 	}
 
 	public void handleMessage(/*pass in message*/) {
-	//actions in response to receiving message
-	//unpack message and get msg type, here, assume type is int
+		//actions in response to receiving message
+		//unpack message and get msg type, here, assume type is int
 		// STUBS FOR COMPILATION PURPOSES
 		int messageType = 0;
 		int interestStatus = 0;
@@ -254,6 +254,15 @@ public class peerProcess extends peerData {
 		
 		//msg_type = extract from message
 		switch (messageType) {
+			//handshake
+			case 0:
+				if(peerDict.get(senderPeerID).initiatedHandshake)
+				{
+					sendBitfield(senderPeerID);
+				}else{
+					sendHandshake(senderPeerID);
+				}
+				break;
 			//bitfield
 			case 1:	updateBitfield(senderPeerID /*Pass a bitfield as well*/);
 				updateInteresting(senderPeerID);
