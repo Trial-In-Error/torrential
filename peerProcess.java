@@ -383,22 +383,22 @@ public class peerProcess extends peerData {
 					break;
 				case 2: msg =  "["+String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf(cal.get(Calendar.SECOND))+"]: "+"Peer ["+myID+"] is connected from ["+lPID+"].";
 					break;
-				/*case 3:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the preferred neighbors ["+neighborList+"].";
+				case 3:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the preferred neighbors ["+neighborList+"].";
 					break;
-				case 4:	msg =  "["+time+"]: "+"Peer ["+myID+"] has the optimistically-unchoked neighbor ["+lPID+"].";
+				case 4:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the optimistically-unchoked neighbor ["+lPID+"].";
 					break;
-				case 5:	msg = "["+time+"]: "+"Peer ["+myID+"] is unchoked by ["+lPID+"].";
+				case 5:	msg = "["+time()+"]: "+"Peer ["+myID+"] is unchoked by ["+lPID+"].";
 					break;
-				case 6:	msg = "["+time+"]: "+"Peer ["+myID+"] is choked by ["+lPID+"]."; 
+				case 6:	msg = "["+time()+"]: "+"Peer ["+myID+"] is choked by ["+lPID+"]."; 
 					break;
-				case 7: msg = "["+time+"]: "+"Peer ["+myID+"] received a 'have' message from ["+lPID+"] for the piece["+String.valueOf(piece)+"].";
+				case 7: msg = "["+time()+"]: "+"Peer ["+myID+"] received a 'have' message from ["+lPID+"] for the piece["+String.valueOf(piece)+"].";
 					break;
-				case 8:	msg = "["+time+"]: "+"Peer ["+myID+"] receive an 'interested' message from ["+lPID+"].";
+				case 8:	msg = "["+time()+"]: "+"Peer ["+myID+"] receive an 'interested' message from ["+lPID+"].";
 					break;      	
-				case 9:	msg = "["+time+"]: "+"Peer ["+myID+"] received a 'not interested' message from ["+lPID+"].";
+				case 9:	msg = "["+time()+"]: "+"Peer ["+myID+"] received a 'not interested' message from ["+lPID+"].";
 					break;
-				case 10: msg = "["+time+"]: "+"Peer ["+myID+"] has downloaded the piece ["+String.valueOf(piece)+"] from ["+lPID+"].";
-					break;*/
+				case 10: msg = "["+time()+"]: "+"Peer ["+myID+"] has downloaded the piece ["+String.valueOf(piece)+"] from ["+lPID+"].";
+					break;
 				default: msg = "-1";//exception
 			}
 			bw.write(msg);
@@ -410,10 +410,12 @@ public class peerProcess extends peerData {
 			
 	}
 
-	/*time method gets compilation error when called ' error: non-static method time() cannot be referenced from a static context' if used in log() like--> String msg = "["+time()+"]";
+	/*time method gets compilation error when called
+	'error: non-static method time() cannot be referenced from a static context'
+	if used in log() like--> String msg = "["+time()+"]";*/
 
 	private String time() {
 		GregorianCalendar cal = new GregorianCalendar();
 		return String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf	(cal.get(Calendar.SECOND));
-	}*/
+	}
 }
