@@ -74,7 +74,7 @@ public class peerProcess extends peerData {
     		peerID = Integer.parseInt(args[0]);
 		} catch (IndexOutOfBoundsException e) {
     		System.out.println("Please pass in a PeerID!");
-    		System.exit(1);
+    		//System.exit(1);
 		}
 		/*initialize();
 		while(true){
@@ -85,6 +85,28 @@ public class peerProcess extends peerData {
 				handle_message();
 		}*/
 		
+		//need to place the class elsewhere to run the rest of the class methods while doing this 
+		class unchoking extends TimerTask {
+			public void run() {
+				//analyze rate of transmission from each preferred neighbor and choke/unchoke appropriately
+			}
+		}
+		Timer timer = new Timer();
+		timer.schedule(new unchoking(), 0, 2*1000);
+		timer.cancel();
+		
+		//need to place elsewhere so that both unchoking() and optimisticUnchoking() can both work
+		/*class optimisticUnchoking extends TimerTask {
+			public void run() {
+				//unchoke optimistically
+				System.out.println("k");
+			}
+		}
+		Timer optimisticTimer = new Timer();
+		optimisticTimer.schedule(new optimisticUnchoking(), 0, 5*1000);
+		optimisticTimer.cancel(); */
+		
+		//do timer.cancel() wherever you end peerProcess or another method	
 		
 		
 	}
@@ -179,7 +201,8 @@ public class peerProcess extends peerData {
 	
 	}
 
-	public void handleMessage(/*pass in message*/) {
+
+	private void handleMessage(/*pass in message*/) {
 	//actions in response to receiving message
 	//unpack message and get msg type, here, assume type is int
 		// STUBS FOR COMPILATION PURPOSES
@@ -204,7 +227,8 @@ public class peerProcess extends peerData {
 			case 2:	removeSender(senderPeerID);
 				break;
 			//unchoke
-			case 3:	addSender(senderPeerID);
+			case 3:	log(senderPeerID, 5, -1);
+				addSender(senderPeerID);
 				sendRequest(senderPeerID);
 				break;
 			//interested
@@ -367,7 +391,7 @@ public class peerProcess extends peerData {
 	}
 
 
-	private void log(int peerID, int localPID, int event, int piece) {
+	private void log(int localPID, int event, int piece) {
 		//write to logfile
 		String msg;
 		String lPID = String.valueOf(localPID);
@@ -379,9 +403,9 @@ public class peerProcess extends peerData {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
 
 			switch (event) {
-				case 1:	msg = "["+String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf(cal.get(Calendar.SECOND))+"]: "+"Peer ["+myID+"] makes a connection to Peer ["+lPID+"].";
+				case 1:	msg = "["+time()+"]: "+"Peer ["+myID+"] makes a connection to Peer ["+lPID+"].";
 					break;
-				case 2: msg =  "["+String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf(cal.get(Calendar.SECOND))+"]: "+"Peer ["+myID+"] is connected from ["+lPID+"].";
+				case 2: msg =  "["+time()+"]: "+"Peer ["+myID+"] is connected from ["+lPID+"].";
 					break;
 				case 3:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the preferred neighbors ["+neighborList+"].";
 					break;
