@@ -143,9 +143,6 @@ public class peerProcess extends peerData {
 		try {
 			Scanner sc = new Scanner(file2);
 			while (sc.hasNext()) {
-				// needs logic to tell if it's the entry for "us"
-				// then it needs to store our portNumber
-				// and remove the entry
 				peerID_Temp = sc.nextInt();
 				host_Temp = sc.next();
 				port_Temp = sc.nextInt();
@@ -154,9 +151,17 @@ public class peerProcess extends peerData {
 				setupDirectory(peerID_Temp);
 				setupLogFiles(peerID_Temp);
 				
-				peerData tempObject = new peerData(peerID_Temp, host_Temp,
-													port_Temp, hasFile_Temp);
-				this.peerDict.put(peerID_Temp, tempObject);
+				if(peerID_Temp != this.peerID)
+				{
+					peerData tempObject = new peerData(peerID_Temp, host_Temp,
+						port_Temp, hasFile_Temp);
+					this.peerDict.put(peerID_Temp, tempObject);
+				}else{
+					this.portNumber = port_Temp;
+				}
+
+
+				//shouldn't the close be outside this pair of braces? like, down a line?
 				sc.close();
 			}
 		}
@@ -227,9 +232,10 @@ public class peerProcess extends peerData {
 					System.err.println(ex);
 				}
 			}
-			//otherwise, it's the entry for us - oops - this shouldn't exist
+			// otherwise, it's the entry for us - oops - this shouldn't exist
 			else
 			{
+				// raise an exception?
 				return;
 			}
 		}
