@@ -47,19 +47,19 @@ public class peerProcess extends peerData {
 
 	// list of all peers known to have interesting pieces
 	// http://docs.oracle.com/javase/7/docs/api/java/util/LinkedList.html
-	private LinkedList interestedList = new LinkedList();
+	private List<Integer> interestedList = new LinkedList<Integer>();
 
 	// list of all peers known to be interested in our pieces
-	private LinkedList interestingList = new LinkedList();
+	private List<Integer> interestingList = new LinkedList<Integer>();
 
 	// list of all peers sending us data
-	private LinkedList senderList = new LinkedList();
+	private List<Integer> senderList = new LinkedList<Integer>(); 
 
 	// list of all peers we're sending data to (preferred neighbors)
-	private LinkedList neighborList = new LinkedList();
+	private List<Integer> neighborList = new LinkedList<Integer>();
 
 	// list of all requests for data in-flight
-	private LinkedList requestsInFlight = new LinkedList();
+	private List requestsInFlight = new LinkedList();
 
 	// THIS NEEDS SET ACCURATELY, DEAR GOD
 	int numberOfPieces = 0;
