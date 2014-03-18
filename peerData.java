@@ -1,10 +1,13 @@
 import java.util.*;
+import java.io.*;
 
 
 public class peerData {
 	public BitSet bitfield;
 	public int messagesSinceLastRound;
 	//public Socket socket;
+	public DataInputStream inboundStream;
+	public DataOutputStream outboundStream;
 	public int portNumber;
 	public String hostName;
 	public boolean initiatedHandshake;

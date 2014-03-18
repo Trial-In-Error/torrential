@@ -1,5 +1,15 @@
 import java.io.*;
 import java.util.*;
+import java.net.*;
+
+
+
+/* Important notes & things to do:
+		1. Remove the entry for "ourself" from the peerDict
+		2. setupConnections => needs to initiate handshakes properly
+		3. setupConnections => client side =>
+			DO WE USE OUR PORT OR THEIRS? ASSUMING THEIRS!
+*/
 
 public class peerProcess extends peerData {
 	// bitfield representing file pieces owned by this peer
@@ -61,8 +71,9 @@ public class peerProcess extends peerData {
 	// list of all requests for data in-flight
 	private List requestsInFlight = new LinkedList();
 
-	// THIS NEEDS SET ACCURATELY, DEAR GOD
+	// THESE NEEDS SET ACCURATELY, DEAR GOD
 	private int numberOfPieces = 0;
+	private int portNumber = 0;
 	
 	//file within peer process directory ../peer [peerID]/
 	private File f = new File("peer_"+String.valueOf(peerID));
@@ -155,7 +166,6 @@ public class peerProcess extends peerData {
 		try {
 			Scanner sc = new Scanner(file2);
 			while (sc.hasNext()) {
-				
 				peerID_Temp = sc.nextInt();
 				host_Temp = sc.next();
 				port_Temp = sc.nextInt();
@@ -164,9 +174,17 @@ public class peerProcess extends peerData {
 				setupDirectory(peerID_Temp);
 				setupLogFiles(peerID_Temp);
 				
-				peerData tempObject = new peerData(peerID_Temp, host_Temp,
-													port_Temp, hasFile_Temp);
-				this.peerDict.put(peerID_Temp, tempObject);
+				if(peerID_Temp != this.peerID)
+				{
+					peerData tempObject = new peerData(peerID_Temp, host_Temp,
+						port_Temp, hasFile_Temp);
+					this.peerDict.put(peerID_Temp, tempObject);
+				}else{
+					this.portNumber = port_Temp;
+				}
+
+
+				//shouldn't the close be outside this pair of braces? like, down a line?
 				sc.close();
 			}
 		}
@@ -196,15 +214,60 @@ public class peerProcess extends peerData {
 	}
 	
 	private void setupConnections() {
-	
-		//Fill in...
-	
+		// for each peer in the dictionary...
+		for(Map.Entry<Integer, peerData> entry: peerDict.entrySet())
+		{
+			peerData peer = entry.getValue();
+			// if we appear first, then we must listen (server)
+			if(this.peerID < peer.ID)
+			{
+				try {
+					// Create a server socket
+					ServerSocket serverSocket = new ServerSocket(this.portNumber);
+					// Listen for a connection request
+					Socket socket = serverSocket.accept();
+					// Create input/output data streams
+					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
+					DataOutputStream outboundStream = new DataOutputStream(socket.getOutputStream());
+					// Pack the peerData object with the new data streams
+					peer.inboundStream = inboundStream;
+					peer.outboundStream = outboundStream;
+				}
+				catch(IOException ex) {
+					System.err.println(ex);
+				}
+			}
+			//if we appear second, then we must send (client)
+			else if(this.peerID > peer.ID)
+			{
+				try {
+					// Create a client socket
+					// DO WE USE OUR PORT OR THEIRS? ASSUMING THEIRS!
+					Socket socket = new Socket(peer.hostName, peer.portNumber);
+					// Create input/output data streams
+					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
+					DataOutputStream outboundStream = new DataOutputStream(socket.getOutputStream());
+					// Pack the peerData object with the new data streams
+					peer.inboundStream = inboundStream;
+					peer.outboundStream = outboundStream;
+					// INITIATE THE HANDSHAKE!!
+				}
+				catch(IOException ex) {
+					System.err.println(ex);
+				}
+			}
+			// otherwise, it's the entry for us - oops - this shouldn't exist
+			else
+			{
+				// raise an exception?
+				return;
+			}
+		}
 	}
 
-
-	private void handleMessage(/*pass in message*/) {
-	//actions in response to receiving message
-	//unpack message and get msg type, here, assume type is int
+	public void handleMessage(/*pass in message*/) {
+		//actions in response to receiving message
+		//unpack message and get msg type, here, assume type is int
 		// STUBS FOR COMPILATION PURPOSES
 		int messageType = 0;
 		int interestStatus = 0;
@@ -215,6 +278,15 @@ public class peerProcess extends peerData {
 		
 		//msg_type = extract from message
 		switch (messageType) {
+			//handshake
+			case 0:
+				if(peerDict.get(senderPeerID).initiatedHandshake)
+				{
+					sendBitfield(senderPeerID);
+				}else{
+					sendHandshake(senderPeerID);
+				}
+				break;
 			//bitfield
 			case 1:	updateBitfield(senderPeerID /*Pass a bitfield as well*/);
 				updateInteresting(senderPeerID);
