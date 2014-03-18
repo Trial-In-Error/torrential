@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.net.*;
 
 
 
@@ -190,12 +191,13 @@ public class peerProcess extends peerData {
 		}
 	}
 	
-	private void setupConnections(int myPID) {
+	private void setupConnections() {
 		// for each peer in the dictionary...
-		for(PeerData peer : peerDict)
+		for(Map.Entry<Integer, peerData> entry: peerDict.entrySet())
 		{
+			peerData peer = entry.getValue();
 			// if we appear first, then we must listen (server)
-			if(myPID < peer.ID)
+			if(this.peerID < peer.ID)
 			{
 				try {
 					// Create a server socket
@@ -214,12 +216,12 @@ public class peerProcess extends peerData {
 				}
 			}
 			//if we appear second, then we must send (client)
-			else if(myPID > peerDict.get(peer.ID))
+			else if(this.peerID > peer.ID)
 			{
 				try {
 					// Create a client socket
 					// DO WE USE OUR PORT OR THEIRS? ASSUMING THEIRS!
-					Socket clientSocket = new Socket(peer.hostName, peer.portNumber);
+					Socket socket = new Socket(peer.hostName, peer.portNumber);
 					// Create input/output data streams
 					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
 					DataOutputStream outboundStream = new DataOutputStream(socket.getOutputStream());
