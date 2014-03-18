@@ -100,6 +100,7 @@ public class peerProcess extends peerData {
 		class unchoking extends TimerTask {
 			public void run() {
 				//analyze rate of transmission from each preferred neighbor and choke/unchoke appropriately
+				log(-1, 3, -1);
 			}
 		}
 		Timer timer = new Timer();
@@ -110,7 +111,7 @@ public class peerProcess extends peerData {
 		/*class optimisticUnchoking extends TimerTask {
 			public void run() {
 				//unchoke optimistically
-				System.out.println("k");
+				log(-1, 4, -1);
 			}
 		}
 		Timer optimisticTimer = new Timer();
@@ -296,7 +297,8 @@ public class peerProcess extends peerData {
 					sendNotInterested(senderPeerID);
 				break;
 			//choke
-			case 2:	removeSender(senderPeerID);
+			case 2:	log(senderID, 6, -1);
+				removeSender(senderPeerID);
 				break;
 			//unchoke
 			case 3:	log(senderPeerID, 5, -1);
@@ -304,10 +306,12 @@ public class peerProcess extends peerData {
 				sendRequest(senderPeerID);
 				break;
 			//interested
-			case 4:	addInterested(senderPeerID);
+			case 4:	log(senderPeerID, 8, -1);
+				addInterested(senderPeerID);
 				break;
 			//not interested
-			case 5:	removeInterested(senderPeerID);
+			case 5:	log(senderPeerID, 9, -1);
+				removeInterested(senderPeerID);
 			//have
 			case 6:	updateBitfield(senderPeerID);
 				// is this REALLY a case of updateInteresting?
