@@ -186,8 +186,9 @@ public class peerProcess extends peerData {
 
 
 				//shouldn't the close be outside this pair of braces? like, down a line?
-				sc.close();
+			
 			}
+			sc.close();
 		}
 		catch(FileNotFoundException e)
 		{
