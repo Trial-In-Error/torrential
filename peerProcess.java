@@ -1,6 +1,15 @@
 import java.io.*;
 import java.util.*;
 
+
+
+/* Important notes & things to do:
+		1. Remove the entry for "ourself" from the peerDict
+		2. setupConnections => needs to initiate handshakes properly
+		3. setupConnections => client side =>
+			DO WE USE OUR PORT OR THEIRS? ASSUMING THEIRS!
+*/
+
 public class peerProcess extends peerData {
 	// bitfield representing file pieces owned by this peer
 	// needs every relevant bit set to zero!
@@ -61,8 +70,9 @@ public class peerProcess extends peerData {
 	// list of all requests for data in-flight
 	private List requestsInFlight = new LinkedList();
 
-	// THIS NEEDS SET ACCURATELY, DEAR GOD
+	// THESE NEEDS SET ACCURATELY, DEAR GOD
 	private int numberOfPieces = 0;
+	private int portNumber = 0;
 	
 	//file within peer process directory ../peer [peerID]/
 	private File f = new File("peer_"+String.valueOf(peerID));
@@ -133,7 +143,9 @@ public class peerProcess extends peerData {
 		try {
 			Scanner sc = new Scanner(file2);
 			while (sc.hasNext()) {
-				
+				// needs logic to tell if it's the entry for "us"
+				// then it needs to store our portNumber
+				// and remove the entry
 				peerID_Temp = sc.nextInt();
 				host_Temp = sc.next();
 				port_Temp = sc.nextInt();
@@ -173,10 +185,54 @@ public class peerProcess extends peerData {
 		}
 	}
 	
-	private void setupConnections() {
-	
-		//Fill in...
-	
+	private void setupConnections(int myPID) {
+		// for each peer in the dictionary...
+		for(PeerData peer : peerDict)
+		{
+			// if we appear first, then we must listen (server)
+			if(myPID < peer.ID)
+			{
+				try {
+					// Create a server socket
+					ServerSocket serverSocket = new ServerSocket(this.portNumber);
+					// Listen for a connection request
+					Socket socket = serverSocket.accept();
+					// Create input/output data streams
+					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
+					DataOutputStream outboundStream = new DataOutputStream(socket.getOutputStream());
+					// Pack the peerData object with the new data streams
+					peer.inboundStream = inboundStream;
+					peer.outboundStream = outboundStream;
+				}
+				catch(IOException ex) {
+					System.err.println(ex);
+				}
+			}
+			//if we appear second, then we must send (client)
+			else if(myPID > peerDict.get(peer.ID))
+			{
+				try {
+					// Create a client socket
+					// DO WE USE OUR PORT OR THEIRS? ASSUMING THEIRS!
+					Socket clientSocket = new Socket(peer.hostName, peer.portNumber);
+					// Create input/output data streams
+					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
+					DataOutputStream outboundStream = new DataOutputStream(socket.getOutputStream());
+					// Pack the peerData object with the new data streams
+					peer.inboundStream = inboundStream;
+					peer.outboundStream = outboundStream;
+					// INITIATE THE HANDSHAKE!!
+				}
+				catch(IOException ex) {
+					System.err.println(ex);
+				}
+			}
+			//otherwise, it's the entry for us - oops - this shouldn't exist
+			else
+			{
+				return;
+			}
+		}
 	}
 
 	public void handleMessage(/*pass in message*/) {
