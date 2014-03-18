@@ -62,7 +62,7 @@ public class peerProcess extends peerData {
 	private List requestsInFlight = new LinkedList();
 
 	// THIS NEEDS SET ACCURATELY, DEAR GOD
-	int numberOfPieces = 0;
+	private int numberOfPieces = 0;
 	
 	//file within peer process directory ../peer [peerID]/
 	private File f = new File("peer_"+String.valueOf(peerID));
