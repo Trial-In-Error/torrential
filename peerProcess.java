@@ -70,6 +70,9 @@ public class peerProcess extends peerData {
 
 	// list of all requests for data in-flight
 	private List requestsInFlight = new LinkedList();
+	
+	//byte representation of file
+	private byte[][] pieces;
 
 	// THESE NEEDS SET ACCURATELY, DEAR GOD
 	private int numberOfPieces = 0;
@@ -126,6 +129,7 @@ public class peerProcess extends peerData {
 	private void initialize() {
 		setupConstants();
 		setupConnections();
+		setupPieces();
 		f.mkdirs();
 		try {
 			file.createNewFile();
@@ -158,7 +162,6 @@ public class peerProcess extends peerData {
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
 		
 		int peerID_Temp = 0;
 		String host_Temp = null;
@@ -198,6 +201,37 @@ public class peerProcess extends peerData {
 		}
 	}
 	
+	private void setupPieces() {
+		pieces = new byte[numberOfPieces][pieceSize + 4];
+		File tempFile = new File(fileName);
+		try {
+			FileInputStream fs = new FileInputStream(tempFile);
+			byte count = 0;
+			for( int i = 0; i<numberOfPieces;i++) {
+				//set index, byte has range 127 to -128 so each byte for index will only count up to 127 then the next byte will start counting from 0 to 127, this way gives limited index  up to 508 if each byte index is added together, up to 508 is sufficient for our purposes as our file only has 306 pieces
+				if(i==128 || i == 255 || i == 382 || i == 509)
+					count = 0;
+				if(i < 128)	
+					pieces[i][0] = count++;
+				else if(i<255)  
+					pieces[i][1] = count++;
+				else if (i < 382)
+					pieces[i][2] = count++;
+				else 
+					pieces[i][3] = count++;
+					
+				for(int j = 0; j<pieceSize; j++) {
+					//fill in bytes of the piece
+						//fs.read() will return -1 if reach end of file
+						pieces[i][j+4] = (byte)fs.read();
+				}
+			}
+			fs.close();
+		}
+		catch( Exception e) {
+			e.printStackTrace();
+		}
+	}
 	private void setupDirectory(int ID) {
 		File dir = new File("/peer_[ID]");
 		dir.mkdir();
@@ -298,7 +332,7 @@ public class peerProcess extends peerData {
 					sendNotInterested(senderPeerID);
 				break;
 			//choke
-			case 2:	log(senderID, 6, -1);
+			case 2:	log(senderPeerID, 6, -1);
 				removeSender(senderPeerID);
 				break;
 			//unchoke
