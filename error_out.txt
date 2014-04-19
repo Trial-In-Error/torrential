@@ -1,0 +1,301 @@
+PeerProcess.java:488: error: class, interface, or enum expected
+	private void sendInterested(int localPID)
+	        ^
+PeerProcess.java:492: error: class, interface, or enum expected
+		peerData temp = peerDict.get(localPID);
+		^
+PeerProcess.java:494: error: class, interface, or enum expected
+		byte[] b = new byte[]{0,0,0,1,2};
+		^
+PeerProcess.java:495: error: class, interface, or enum expected
+		try {
+		^
+PeerProcess.java:498: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:501: error: class, interface, or enum expected
+			System.out.println("SEND INTERESTED FAILED");
+			^
+PeerProcess.java:503: error: class, interface, or enum expected
+			temp.outboundStream.write(b, 0, b.length);
+			^
+PeerProcess.java:504: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:511: error: class, interface, or enum expected
+		peerData temp = peerDict.get(localPID);
+		^
+PeerProcess.java:513: error: class, interface, or enum expected
+		byte[] b = new byte[]{0,0,0,1,3};
+		^
+PeerProcess.java:514: error: class, interface, or enum expected
+		try {
+		^
+PeerProcess.java:517: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:520: error: class, interface, or enum expected
+			System.out.println("SEND NOT INTERESTED");
+			^
+PeerProcess.java:522: error: class, interface, or enum expected
+			temp.outboundStream.write(b, 0, b.length);
+			^
+PeerProcess.java:523: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:531: error: class, interface, or enum expected
+		peerData temp = peerDict.get(localPID);
+		^
+PeerProcess.java:532: error: class, interface, or enum expected
+		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
+		^
+PeerProcess.java:533: error: class, interface, or enum expected
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		^
+PeerProcess.java:534: error: class, interface, or enum expected
+		try {
+		^
+PeerProcess.java:536: error: class, interface, or enum expected
+		outputStream.write(b);
+		^
+PeerProcess.java:537: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:540: error: class, interface, or enum expected
+			System.out.println("SEND HAVE BYTE MANIP FAILED");
+			^
+PeerProcess.java:541: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:546: error: class, interface, or enum expected
+		try {
+		^
+PeerProcess.java:548: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:551: error: class, interface, or enum expected
+			System.out.println("SEND HAVE FAILED");
+			^
+PeerProcess.java:552: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:563: error: class, interface, or enum expected
+		peerData temp = peerDict.get(localPID);
+		^
+PeerProcess.java:564: error: class, interface, or enum expected
+		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
+		^
+PeerProcess.java:565: error: class, interface, or enum expected
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		^
+PeerProcess.java:566: error: class, interface, or enum expected
+		try {
+		^
+PeerProcess.java:568: error: class, interface, or enum expected
+		outputStream.write(b);
+		^
+PeerProcess.java:569: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:572: error: class, interface, or enum expected
+			System.out.println("SEND REQUEST BYTE MANIP FAILED");
+			^
+PeerProcess.java:573: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:577: error: class, interface, or enum expected
+		try {
+		^
+PeerProcess.java:579: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:582: error: class, interface, or enum expected
+			System.out.println("SEND REQ FAILED");
+			^
+PeerProcess.java:583: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:595: error: class, interface, or enum expected
+		temp.initiatedHandshake = true;
+		^
+PeerProcess.java:600: error: class, interface, or enum expected
+		byte[] b = new byte[32];
+		^
+PeerProcess.java:601: error: class, interface, or enum expected
+		String str = "HELLO"+"00000000000000000000000";
+		^
+PeerProcess.java:602: error: class, interface, or enum expected
+		String str2 = String.valueOf(peerID);
+		^
+PeerProcess.java:603: error: class, interface, or enum expected
+		while(str.length() != 4) {
+		^
+PeerProcess.java:605: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:607: error: class, interface, or enum expected
+		b = str.getBytes();
+		^
+PeerProcess.java:608: error: class, interface, or enum expected
+		try {
+		^
+PeerProcess.java:610: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:613: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:622: error: class, interface, or enum expected
+	}
+	^
+PeerProcess.java:629: error: class, interface, or enum expected
+		BitSet tempBitfield = new BitSet(tempSize);
+		^
+PeerProcess.java:630: error: class, interface, or enum expected
+		tempBitfield = (BitSet) internalBitfield.clone();
+		^
+PeerProcess.java:631: error: class, interface, or enum expected
+		tempBitfield.flip(0, tempSize-1);
+		^
+PeerProcess.java:632: error: class, interface, or enum expected
+		if(tempBitfield.isEmpty() && tempBitfield.size() == this.numberOfPieces)
+		^
+PeerProcess.java:635: error: class, interface, or enum expected
+		}else{
+		^
+PeerProcess.java:637: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:644: error: class, interface, or enum expected
+		String lPID = String.valueOf(localPID);
+		^
+PeerProcess.java:645: error: class, interface, or enum expected
+		String myID = String.valueOf(peerID);
+		^
+PeerProcess.java:646: error: class, interface, or enum expected
+		GregorianCalendar cal = new GregorianCalendar();
+		^
+PeerProcess.java:648: error: class, interface, or enum expected
+		try {
+		^
+PeerProcess.java:652: error: class, interface, or enum expected
+			switch (event) {
+			^
+PeerProcess.java:654: error: class, interface, or enum expected
+					break;
+					^
+PeerProcess.java:655: error: class, interface, or enum expected
+				case 2: msg =  "["+time()+"]: "+"Peer ["+myID+"] is connected from ["+lPID+"].";
+				^
+PeerProcess.java:656: error: class, interface, or enum expected
+					break;
+					^
+PeerProcess.java:657: error: class, interface, or enum expected
+				case 3:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the preferred neighbors ["+neighborList+"].";
+				^
+PeerProcess.java:658: error: class, interface, or enum expected
+					break;
+					^
+PeerProcess.java:659: error: class, interface, or enum expected
+				case 4:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the optimistically-unchoked neighbor ["+lPID+"].";
+				^
+PeerProcess.java:660: error: class, interface, or enum expected
+					break;
+					^
+PeerProcess.java:661: error: class, interface, or enum expected
+				case 5:	msg = "["+time()+"]: "+"Peer ["+myID+"] is unchoked by ["+lPID+"].";
+				^
+PeerProcess.java:662: error: class, interface, or enum expected
+					break;
+					^
+PeerProcess.java:663: error: class, interface, or enum expected
+				case 6:	msg = "["+time()+"]: "+"Peer ["+myID+"] is choked by ["+lPID+"]."; 
+				^
+PeerProcess.java:664: error: class, interface, or enum expected
+					break;
+					^
+PeerProcess.java:665: error: class, interface, or enum expected
+				case 7: msg = "["+time()+"]: "+"Peer ["+myID+"] received a 'have' message from ["+lPID+"] for the piece["+String.valueOf(piece)+"].";
+				^
+PeerProcess.java:666: error: class, interface, or enum expected
+					break;
+					^
+PeerProcess.java:667: error: class, interface, or enum expected
+				case 8:	msg = "["+time()+"]: "+"Peer ["+myID+"] receive an 'interested' message from ["+lPID+"].";
+				^
+PeerProcess.java:668: error: class, interface, or enum expected
+					break;      	
+					^
+PeerProcess.java:669: error: class, interface, or enum expected
+				case 9:	msg = "["+time()+"]: "+"Peer ["+myID+"] received a 'not interested' message from ["+lPID+"].";
+				^
+PeerProcess.java:670: error: class, interface, or enum expected
+					break;
+					^
+PeerProcess.java:671: error: class, interface, or enum expected
+				case 10: msg = "["+time()+"]: "+"Peer ["+myID+"] has downloaded the piece ["+String.valueOf(piece)+"] from ["+lPID+"].";
+				^
+PeerProcess.java:672: error: class, interface, or enum expected
+					break;
+					^
+PeerProcess.java:673: error: class, interface, or enum expected
+				default: msg = "-1";//exception
+				^
+PeerProcess.java:674: error: class, interface, or enum expected
+			}
+			^
+PeerProcess.java:676: error: class, interface, or enum expected
+			bw.close();
+			^
+PeerProcess.java:677: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:680: error: class, interface, or enum expected
+		}
+		^
+PeerProcess.java:690: error: class, interface, or enum expected
+		return String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf	(cal.get(Calendar.SECOND));
+		^
+PeerProcess.java:691: error: class, interface, or enum expected
+	}
+	^
+PeerProcess.java:697: error: class, interface, or enum expected
+		Collections.sort(sortedPeers, new Comparator<peerData>() {
+		^
+PeerProcess.java:699: error: class, interface, or enum expected
+			public int compare(peerData peer1, peerData peer2) {
+			       ^
+PeerProcess.java:701: error: class, interface, or enum expected
+			}		
+			^
+PeerProcess.java:704: error: class, interface, or enum expected
+		for (int i = 0; i < numberOfPreferredNeighbors; i++) { 
+		^
+PeerProcess.java:704: error: class, interface, or enum expected
+		for (int i = 0; i < numberOfPreferredNeighbors; i++) { 
+		                ^
+PeerProcess.java:704: error: class, interface, or enum expected
+		for (int i = 0; i < numberOfPreferredNeighbors; i++) { 
+		                                                ^
+PeerProcess.java:707: error: class, interface, or enum expected
+				peerDict.get(sortedPeers.get(i).ID).isChoked = false;
+				^
+PeerProcess.java:708: error: class, interface, or enum expected
+			}	if (sortedPeers.get(i).isOptimisticallyUnchoked) {
+			^
+PeerProcess.java:710: error: class, interface, or enum expected
+			}
+			^
+PeerProcess.java:714: error: class, interface, or enum expected
+		for (int i = numberOfPreferredNeighbors; i < sortedPeers.size(); i++) {
+		                                         ^
+PeerProcess.java:714: error: class, interface, or enum expected
+		for (int i = numberOfPreferredNeighbors; i < sortedPeers.size(); i++) {
+		                                                                 ^
+PeerProcess.java:717: error: class, interface, or enum expected
+				peerDict.get(sortedPeers.get(i).ID).isChoked = true;
+				^
+PeerProcess.java:718: error: class, interface, or enum expected
+			}
+			^
+100 errors
