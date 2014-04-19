@@ -571,7 +571,7 @@ public class peerProcess extends peerData {
 		byte[] c = outputStream.toByteArray();
 		
 		try {
-		temp.outboundStream.write(b,0,b.length);
+		temp.outboundStream.write(c,0,c.length);
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
