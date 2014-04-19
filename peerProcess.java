@@ -306,6 +306,7 @@ public class peerProcess extends peerData {
 					peer.outboundStream = outboundStream;
 					// INITIATE THE HANDSHAKE!!
 					this.sendHandshake(peer.ID);
+					this.log(this.peerID, 1, -1);
 				}
 				catch(IOException ex) {
 					System.err.println(ex);
@@ -342,6 +343,7 @@ public class peerProcess extends peerData {
 				}else{
 					sendHandshake(senderPeerID);
 				}
+				log(this.peerID, 2, -1);
 				break;
 			//bitfield
 			case 1:	updateBitfield(senderPeerID /*Pass a bitfield as well*/);
