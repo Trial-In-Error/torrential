@@ -287,6 +287,7 @@ public class peerProcess extends peerData {
 					peer.inboundStream = inboundStream;
 					peer.outboundStream = outboundStream;
 					// INITIATE THE HANDSHAKE!!
+					self.sendHandshake(peer.ID);
 				}
 				catch(IOException ex) {
 					System.err.println(ex);
@@ -476,6 +477,7 @@ public class peerProcess extends peerData {
 		peerData temp = peerDict.get(localPID);
 		temp.initiatedHandshake = true;
 		// send the handshake
+		temp.outboundStream.write(/*handshake-header, zero bits, PID*/)
 	}
 
 	private void removeRequestsInFlight(int localPID)
