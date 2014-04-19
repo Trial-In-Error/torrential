@@ -2,6 +2,7 @@ import java.io.*;
 import java.nio.*;
 import java.util.*;
 import java.net.*;
+import java.lang.*;
 
 
 
@@ -85,15 +86,17 @@ public class peerProcess extends peerData {
 	private File file = new File(f, "log_peer_["+String.valueOf(peerID)+"].log");
 
 	public static void main(String [] args) {
+	
+		peerProcess localPeer = new peerProcess();
 		try {
-    		peerID = Integer.parseInt(args[0]);
+    		localPeer.peerID = Integer.parseInt(args[0]);
 		} catch (IndexOutOfBoundsException e) {
     		System.out.println("Please pass in a PeerID!");
     		//System.exit(1);
 		}
-		initialize();
+		localPeer.initialize();
 		long timeUnchoke = System.currentTimeMillis();
-		long timeOp = System.currentTimeMilis();
+		long timeOp = System.currentTimeMillis();
 		while(true){
 			//for each peer:
 			//implement as for-each loop on peerDict
@@ -101,20 +104,21 @@ public class peerProcess extends peerData {
 			//for(PeerData peer : peerDict){};
 				//handle_message();
 			
-			if (System.currentTimeMilis() > time + 1000*this.unchokingInterval) {
+			if (System.currentTimeMillis() > timeUnchoke + 1000*localPeer.unchokingInterval) {
 				
-				
-				time = System.currentTimeMilis();
-			};
+				localPeer.unchokingUpdate();
+				timeUnchoke = System.currentTimeMillis();
+			}
 			
-			if (System.currentTimeMilis() > time + 1000*this.optimisticUnchokingInterval) {
+			if (System.currentTimeMillis() > timeOp + 1000*localPeer.optimisticUnchokingInterval) {
+			
+				localPeer.optimisticUnchokingUpdate();
+				timeOp = System.currentTimeMillis();
+			}
 			
 			
-				time = System.currentTimeMilis();
-			};
-			
-			
-		}*/
+		}
+	
 		
 		//need to place the class elsewhere to run the rest of the class methods while doing this 
 
@@ -459,11 +463,9 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND CHOKE FAILED");
-			temp.outboundStream.write(b, 0, b.length);
+			
 		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
+		
 	}
 
 	private void sendUnchoke(int localPID)
@@ -479,15 +481,9 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND UNCHOKE FAILED");
-		
-		try {
-			temp.outboundStream.write(b, 0, b.length);
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-
 		}
 	}
+
 
 	private void sendInterested(int localPID)
 	{
@@ -504,11 +500,7 @@ public class peerProcess extends peerData {
 			System.out.println(ex.toString());
 			System.out.println("SEND INTERESTED FAILED");
 
-			temp.outboundStream.write(b, 0, b.length);
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-
+			
 		}
 	}
 
@@ -527,12 +519,9 @@ public class peerProcess extends peerData {
 			System.out.println(ex.toString());
 			System.out.println("SEND NOT INTERESTED");
 
-			temp.outboundStream.write(b, 0, b.length);
+			
 		}
-		catch(IOException e) {
-			e.printStackTrace();
-
-		}
+	
 	}
 
 	private void sendHave(int localPID, int pieceID)
@@ -713,19 +702,19 @@ public class peerProcess extends peerData {
 		});
 			//Send unchoke messages to the best neighbors
 		for (int i = 0; i < numberOfPreferredNeighbors; i++) { 
-			if (sortedPeers[i].isChoked) {
-				sendUnchoke(sortedPeers[i].ID);
-				peerDict.get(sortedPeers[i].ID).isChoked = false;
-			}	if (sortedPeers[i].ID.isOptimisticallyUnchoked) {
-					peerDict.get(sortedPeers[i].ID).isOptimisticallyUnchoked = false;
+			if (sortedPeers.get(i).isChoked) {
+				sendUnchoke(sortedPeers.get(i).ID);
+				peerDict.get(sortedPeers.get(i).ID).isChoked = false;
+			}	if (sortedPeers.get(i).isOptimisticallyUnchoked) {
+					peerDict.get(sortedPeers.get(i).ID).isOptimisticallyUnchoked = false;
 			}
 		
 		}
 			//Send Choke to the rest
-		for (int i = numberOfPreferredNeighbors; i < sortedPeers.length; i++) {
-			if (!sortedPeers[i].isChoked && !sortedPeers[i].isOptimisticallyUnchoked) {
-				sendChoke(sortedPeers[i].ID);
-				peerDict.get(sortedPeers[i].ID).isChoked = true;
+		for (int i = numberOfPreferredNeighbors; i < sortedPeers.size(); i++) {
+			if (!sortedPeers.get(i).isChoked && !sortedPeers.get(i).isOptimisticallyUnchoked) {
+				sendChoke(sortedPeers.get(i).ID);
+				peerDict.get(sortedPeers.get(i).ID).isChoked = true;
 			}
 			
 		}
@@ -737,12 +726,12 @@ public class peerProcess extends peerData {
 		List<peerData> peers = new ArrayList<peerData>(peerDict.values());
 		long seed = System.nanoTime();
 		Collections.shuffle(peers, new Random(seed));
-		for (int i = 0; i < peers.length; i++) {
+		for (int i = 0; i < peers.size(); i++) {
 			
-			if(peers[i].isChoked && peers[i].isInterested) {
+			if(peers.get(i).isChoked && peers.get(i).isInterested) {
 			
-				sendUnchoke(peers[i].ID);
-				peerDict.get(peers[i].ID).isOptimisticallyUnchoked = true;
+				sendUnchoke(peers.get(i).ID);
+				peerDict.get(peers.get(i).ID).isOptimisticallyUnchoked = true;
 				
 						
 			}
