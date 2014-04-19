@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 import java.net.*;
+import java.nio.*;
 
 
 
@@ -208,24 +209,18 @@ public class peerProcess extends peerData {
 		File tempFile = new File(fileName);
 		try {
 			FileInputStream fs = new FileInputStream(tempFile);
-			byte count = 0;
 			for( int i = 0; i<numberOfPieces;i++) {
-				//set index, byte has range 127 to -128 so each byte for index will only count up to 127 then the next byte will start counting from 0 to 127, this way gives limited index  up to 508 if each byte index is added together, up to 508 is sufficient for our purposes as our file only has 306 pieces
-				if(i==128 || i == 255 || i == 382 || i == 509)
-					count = 0;
-				if(i < 128)	
-					pieces[i][0] = count++;
-				else if(i<255)  
-					pieces[i][1] = count++;
-				else if (i < 382)
-					pieces[i][2] = count++;
-				else 
-					pieces[i][3] = count++;
+				//indices will not have a purely ascending or descending order only because byte uses 2's complement, irrelevant to us since only the program needs to know the indices
+				ByteBuffer buf = ByteBuffer.allocate(4);
+				//put an int in the first 4 bytes of the piece for index
+				buf.putInt(0, i);
+				System.arraycopy(buf.array(), 0, pieces[i], 0, 4);
 					
-				for(int j = 0; j<pieceSize; j++) {
+				//fills in the rest of the bytes in the piece with contents
+				for(int j = 4; j<pieceSize+4; j++) {
 					//fill in bytes of the piece
 						//fs.read() will return -1 if reach end of file
-						pieces[i][j+4] = (byte)fs.read();
+						pieces[i][j] = (byte)fs.read();
 				}
 			}
 			fs.close();
@@ -311,9 +306,10 @@ public class peerProcess extends peerData {
 		int messageType = 0;
 		int interestStatus = 0;
 
-
 		int senderPeerID = 0;
 		int stub = 0;
+		
+		
 		
 		//msg_type = extract from message
 		switch (messageType) {
