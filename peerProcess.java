@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.*;
 import java.util.*;
 import java.net.*;
 
@@ -103,7 +104,7 @@ public class peerProcess extends peerData {
 	 class unchoking extends TimerTask {
 			public void run() {
 				//analyze rate of transmission from each preferred neighbor and choke/unchoke appropriately
-				log(-1, 3, -1);
+				//log(-1, 3, -1);
 			}
 		}
 		Timer timer = new Timer();
@@ -287,7 +288,7 @@ public class peerProcess extends peerData {
 					peer.inboundStream = inboundStream;
 					peer.outboundStream = outboundStream;
 					// INITIATE THE HANDSHAKE!!
-					self.sendHandshake(peer.ID);
+					this.sendHandshake(peer.ID);
 				}
 				catch(IOException ex) {
 					System.err.println(ex);
@@ -339,7 +340,8 @@ public class peerProcess extends peerData {
 			//unchoke
 			case 3:	log(senderPeerID, 5, -1);
 				addSender(senderPeerID);
-				sendRequest(senderPeerID);
+				//fix input types
+				sendRequest(senderPeerID, 0);
 				break;
 			//interested
 			case 4:	log(senderPeerID, 8, -1);
@@ -371,7 +373,7 @@ public class peerProcess extends peerData {
 				break;
 			//piece
 			case 8:	updateMyBitfield();
-				sendHave();	//method will send to all peers
+				sendHave(1,4);	//method will send to all peers
 				peerDict.get(senderPeerID).messagesSinceLastRound++;
 				updateInteresting(senderPeerID);
 				removeRequestsInFlight(senderPeerID);
@@ -430,45 +432,92 @@ public class peerProcess extends peerData {
 	{
 		// send the choke message
 		this.neighborList.remove(localPID);
-		peerData temp = peerDict[localPID];
+		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,0};
+		try {
 		temp.outboundStream.write(b,0,b.length);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.toString());
+			System.out.println("SEND CHOKE FAILED");
+		}
 	}
 
 	private void sendUnchoke(int localPID)
 	{
 		// send the unChoke message
 		this.neighborList.add(localPID);
-		peerData temp = peerDict(localPID);
+		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,1};
+		try {
 		temp.outboundStream.write(b,0,b.length);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.toString());
+			System.out.println("SEND UNCHOKE FAILED");
+		}
 	}
 
 	private void sendInterested(int localPID)
 	{
 		// send the interested message
 		this.updateInteresting(localPID);
-		peerData temp = peerDict(localPID);
+		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,2};
+		try {
 		temp.outboundStream.write(b,0,b.length);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.toString());
+			System.out.println("SEND INTERESTED FAILED");
+		}
 	}
 
 	private void sendNotInterested(int localPID)
 	{
 		// send the notInterested message
 		this.interestedList.remove(localPID);
-		peerData temp = peerDict(localPID);
+		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,3};
+		try {
 		temp.outboundStream.write(b,0,b.length);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.toString());
+			System.out.println("SEND NOT INTERESTED");
+		}
 	}
 
-	private void sendHave()
+	private void sendHave(int localPID, int pieceID)
 	{
-		// send the have message
+	
+		byte[] a = new byte[]{0,0,0,1,4};
+		peerData temp = peerDict.get(localPID);
+		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		try {
+		outputStream.write(a);
+		outputStream.write(b);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.toString());
+			System.out.println("SEND HAVE BYTE MANIP FAILED");
+		}
+		
+		byte[] c = outputStream.toByteArray();
+		
+		
+		try {
+		temp.outboundStream.write(b,0,b.length);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.toString());
+			System.out.println("SEND HAVE FAILED");
+		}
 	}
 
 	private void sendBitfield(int localPID)
@@ -476,10 +525,30 @@ public class peerProcess extends peerData {
 		// send the bitfield
 	}
 
-	private void sendRequest(int localPID)
+	private void sendRequest(int localPID, int pieceID)
 	{
-		// send the request
-		// add request to 'requests in flight' list
+		byte[] a = new byte[]{0,0,0,1,6};
+		peerData temp = peerDict.get(localPID);
+		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		try {
+		outputStream.write(a);
+		outputStream.write(b);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.toString());
+			System.out.println("SEND REQUEST BYTE MANIP FAILED");
+		}
+		
+		byte[] c = outputStream.toByteArray();
+		
+		try {
+		temp.outboundStream.write(b,0,b.length);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.toString());
+			System.out.println("SEND REQ FAILED");
+		}
 	}
 
 	private void sendPiece(int localPID)
@@ -493,7 +562,7 @@ public class peerProcess extends peerData {
 		peerData temp = peerDict.get(localPID);
 		temp.initiatedHandshake = true;
 		// send the handshake
-		temp.outboundStream.write(/*handshake-header, zero bits, PID*/)
+		//temp.outboundStream.write(/*handshake-header, zero bits, PID*/);
 	}
 
 	private void removeRequestsInFlight(int localPID)
