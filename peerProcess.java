@@ -101,7 +101,9 @@ public class peerProcess extends peerData {
 		}*/
 		
 		//need to place the class elsewhere to run the rest of the class methods while doing this 
-	 class unchoking extends TimerTask {
+
+		/*class unchoking extends TimerTask {
+
 			public void run() {
 				//analyze rate of transmission from each preferred neighbor and choke/unchoke appropriately
 				//log(-1, 3, -1);
@@ -109,7 +111,7 @@ public class peerProcess extends peerData {
 		}
 		Timer timer = new Timer();
 		timer.schedule(new unchoking(), 0, 2*1000);
-		timer.cancel();
+		timer.cancel();*/
 		
 		//need to place elsewhere so that both unchoking() and optimisticUnchoking() can both work
 		/*class optimisticUnchoking extends TimerTask {
@@ -441,6 +443,10 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND CHOKE FAILED");
+			temp.outboundStream.write(b, 0, b.length);
+		}
+		catch(IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -457,6 +463,13 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND UNCHOKE FAILED");
+		
+		try {
+			temp.outboundStream.write(b, 0, b.length);
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+
 		}
 	}
 
@@ -468,11 +481,18 @@ public class peerProcess extends peerData {
 		
 		byte[] b = new byte[]{0,0,0,1,2};
 		try {
+
 		temp.outboundStream.write(b,0,b.length);
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND INTERESTED FAILED");
+
+			temp.outboundStream.write(b, 0, b.length);
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+
 		}
 	}
 
@@ -484,11 +504,18 @@ public class peerProcess extends peerData {
 		
 		byte[] b = new byte[]{0,0,0,1,3};
 		try {
+
 		temp.outboundStream.write(b,0,b.length);
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND NOT INTERESTED");
+
+			temp.outboundStream.write(b, 0, b.length);
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+
 		}
 	}
 
@@ -562,7 +589,24 @@ public class peerProcess extends peerData {
 		peerData temp = peerDict.get(localPID);
 		temp.initiatedHandshake = true;
 		// send the handshake
+
 		//temp.outboundStream.write(/*handshake-header, zero bits, PID*/);
+
+		byte[] b = new byte[32];
+		String str = "HELLO"+"00000000000000000000000";
+		String str2 = String.valueOf(peerID);
+		while(str.length() != 4) {
+			str2 = "0"+str2;
+		}
+		str = str+str2;
+		b = str.getBytes();
+		try {
+			temp.outboundStream.write(b, 0, b.length);
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	private void removeRequestsInFlight(int localPID)
