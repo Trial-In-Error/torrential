@@ -4,7 +4,7 @@ import java.io.*;
 
 public class peerData {
 	public BitSet bitfield;
-	public int messagesSinceLastRound;
+	public int piecesSinceLastRound;
 	//public Socket socket;
 	public DataInputStream inboundStream;
 	public DataOutputStream outboundStream;
@@ -33,7 +33,7 @@ public class peerData {
 		this.isOptimisticallyUnchoked = false;
 		this.isSender = false;
 		this.initiatedHandshake = false;
-		this.messagesSinceLastRound = 0;
+		this.piecesSinceLastRound = 0;
 		this.bitfield = new BitSet();
 	}
 	
@@ -48,7 +48,7 @@ public class peerData {
 		this.isOptimisticallyUnchoked = false;
 		this.isSender = false;
 		this.initiatedHandshake = false;
-		this.messagesSinceLastRound = 0;
+		this.piecesSinceLastRound = 0;
 		this.bitfield = new BitSet();
 		
 		

@@ -91,13 +91,29 @@ public class peerProcess extends peerData {
     		System.out.println("Please pass in a PeerID!");
     		//System.exit(1);
 		}
-		/*initialize();
+		initialize();
+		long timeUnchoke = System.currentTimeMillis();
+		long timeOp = System.currentTimeMilis();
 		while(true){
 			//for each peer:
 			//implement as for-each loop on peerDict
 				//http://www.javapractices.com/topic/TopicAction.do?Id=196
 			//for(PeerData peer : peerDict){};
-				handle_message();
+				//handle_message();
+			
+			if (System.currentTimeMilis() > time + 1000*this.unchokingInterval) {
+				
+				
+				time = System.currentTimeMilis();
+			};
+			
+			if (System.currentTimeMilis() > time + 1000*this.optimisticUnchokingInterval) {
+			
+			
+				time = System.currentTimeMilis();
+			};
+			
+			
 		}*/
 		
 		//need to place the class elsewhere to run the rest of the class methods while doing this 
@@ -376,7 +392,7 @@ public class peerProcess extends peerData {
 			//piece
 			case 8:	updateMyBitfield();
 				sendHave(1,4);	//method will send to all peers
-				peerDict.get(senderPeerID).messagesSinceLastRound++;
+				peerDict.get(senderPeerID).piecesSinceLastRound++;
 				updateInteresting(senderPeerID);
 				removeRequestsInFlight(senderPeerID);
 				checkCompletion();
@@ -684,4 +700,56 @@ public class peerProcess extends peerData {
 		GregorianCalendar cal = new GregorianCalendar();
 		return String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf	(cal.get(Calendar.SECOND));
 	}
+	
+	private void unchokingUpdate() {
+		
+		
+		List<peerData> sortedPeers = new ArrayList<peerData>(peerDict.values());
+		Collections.sort(sortedPeers, new Comparator<peerData>() {
+		
+			public int compare(peerData peer1, peerData peer2) {
+				return peer1.piecesSinceLastRound - peer2.piecesSinceLastRound;
+			}		
+		});
+			//Send unchoke messages to the best neighbors
+		for (int i = 0; i < numberOfPreferredNeighbors; i++) { 
+			if (sortedPeers[i].isChoked) {
+				sendUnchoke(sortedPeers[i].ID);
+				peerDict.get(sortedPeers[i].ID).isChoked = false;
+			}	if (sortedPeers[i].ID.isOptimisticallyUnchoked) {
+					peerDict.get(sortedPeers[i].ID).isOptimisticallyUnchoked = false;
+			}
+		
+		}
+			//Send Choke to the rest
+		for (int i = numberOfPreferredNeighbors; i < sortedPeers.length; i++) {
+			if (!sortedPeers[i].isChoked && !sortedPeers[i].isOptimisticallyUnchoked) {
+				sendChoke(sortedPeers[i].ID);
+				peerDict.get(sortedPeers[i].ID).isChoked = true;
+			}
+			
+		}
+		
+	}
+	
+	
+	private void optimisticUnchokingUpdate() {
+		List<peerData> peers = new ArrayList<peerData>(peerDict.values());
+		long seed = System.nanoTime();
+		Collections.shuffle(peers, new Random(seed));
+		for (int i = 0; i < peers.length; i++) {
+			
+			if(peers[i].isChoked && peers[i].isInterested) {
+			
+				sendUnchoke(peers[i].ID);
+				peerDict.get(peers[i].ID).isOptimisticallyUnchoked = true;
+				
+						
+			}
+			
+		}
+	
+	}
+	
+	
 }
