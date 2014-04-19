@@ -517,10 +517,12 @@ public class peerProcess extends peerData {
 		temp.initiatedHandshake = true;
 		// send the handshake
 		byte[] b = new byte[32];
-		String str = "HELLO"+"00000000000000000000000"+String.valueOf(peerID);
-		while(str.length() != 32) {
-			str = str+"0";
+		String str = "HELLO"+"00000000000000000000000";
+		String str2 = String.valueOf(peerID);
+		while(str.length() != 4) {
+			str2 = "0"+str2;
 		}
+		str = str+str2;
 		b = str.getBytes();
 		try {
 			temp.outboundStream.write(b, 0, b.length);
