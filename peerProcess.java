@@ -100,7 +100,7 @@ public class peerProcess extends peerData {
 		}*/
 		
 		//need to place the class elsewhere to run the rest of the class methods while doing this 
-		class unchoking extends TimerTask {
+	public class unchoking extends TimerTask {
 			public void run() {
 				//analyze rate of transmission from each preferred neighbor and choke/unchoke appropriately
 				log(-1, 3, -1);
@@ -430,24 +430,40 @@ public class peerProcess extends peerData {
 	{
 		// send the choke message
 		this.neighborList.remove(localPID);
+		peerData temp = peerDict[localPID];
+		
+		byte[] b = new byte[]{0,0,0,1,0};
+		temp.outboundStream.write(b,0,b.length);
 	}
 
 	private void sendUnchoke(int localPID)
 	{
 		// send the unChoke message
 		this.neighborList.add(localPID);
+		peerData temp = peerDict(localPID);
+		
+		byte[] b = new byte[]{0,0,0,1,1};
+		temp.outboundStream.write(b,0,b.length);
 	}
 
 	private void sendInterested(int localPID)
 	{
 		// send the interested message
 		this.updateInteresting(localPID);
+		peerData temp = peerDict(localPID);
+		
+		byte[] b = new byte[]{0,0,0,1,2};
+		temp.outboundStream.write(b,0,b.length);
 	}
 
 	private void sendNotInterested(int localPID)
 	{
 		// send the notInterested message
 		this.interestedList.remove(localPID);
+		peerData temp = peerDict(localPID);
+		
+		byte[] b = new byte[]{0,0,0,1,3};
+		temp.outboundStream.write(b,0,b.length);
 	}
 
 	private void sendHave()
