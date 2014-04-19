@@ -100,7 +100,7 @@ public class peerProcess extends peerData {
 		}*/
 		
 		//need to place the class elsewhere to run the rest of the class methods while doing this 
-	public class unchoking extends TimerTask {
+	 class unchoking extends TimerTask {
 			public void run() {
 				//analyze rate of transmission from each preferred neighbor and choke/unchoke appropriately
 				log(-1, 3, -1);
