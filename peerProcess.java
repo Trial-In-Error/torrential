@@ -502,6 +502,7 @@ public class peerProcess extends peerData {
 		byte[] b = new byte[]{0,0,0,1,0};
 		try {
 		temp.outboundStream.write(b,0,b.length);
+		System.out.println("Sent Choke message to peer "+localPID+".");
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
@@ -520,6 +521,7 @@ public class peerProcess extends peerData {
 		byte[] b = new byte[]{0,0,0,1,1};
 		try {
 		temp.outboundStream.write(b,0,b.length);
+		System.out.println("Sent Unchoke message to peer "+localPID+".");
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
@@ -536,8 +538,8 @@ public class peerProcess extends peerData {
 		
 		byte[] b = new byte[]{0,0,0,1,2};
 		try {
-
 		temp.outboundStream.write(b,0,b.length);
+		System.out.println("Sent Interested message to peer "+localPID+".");
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
@@ -557,6 +559,7 @@ public class peerProcess extends peerData {
 		try {
 
 		temp.outboundStream.write(b,0,b.length);
+		System.out.println("Sent Not Interested message to peer "+localPID+".");
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
@@ -575,8 +578,9 @@ public class peerProcess extends peerData {
 		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
-		outputStream.write(a);
-		outputStream.write(b);
+			outputStream.write(a);
+			outputStream.write(b);
+			System.out.println("Sent Have message to peer "+localPID+".");
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
@@ -609,8 +613,9 @@ public class peerProcess extends peerData {
 		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
-		outputStream.write(a);
-		outputStream.write(b);
+			outputStream.write(a);
+			outputStream.write(b);
+			System.out.println("Sent Request message to peer "+localPID+".");
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
