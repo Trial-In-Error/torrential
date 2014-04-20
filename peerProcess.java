@@ -422,6 +422,7 @@ public class peerProcess extends peerData {
 			//not interested
 			case 3:	log(senderPeerID, 9, -1);
 				removeInterested(senderPeerID);
+				break;
 			//have
 			case 4:	updateBitfield(senderPeerID, 1, payload);
 				// is this REALLY a case of updateInteresting?
@@ -479,7 +480,8 @@ public class peerProcess extends peerData {
 
 	private void removeInteresting(int localPeerID)
 	{
-		interestingList.remove(localPeerID);
+
+		interestingList.remove(Integer.valueOf(localPeerID));
 	}
 
 	public void addSender(int sPeerID)
@@ -490,7 +492,7 @@ public class peerProcess extends peerData {
 
 	public void removeSender(int sPeerID)
 	{
-		senderList.remove(sPeerID);
+		senderList.remove(Integer.valueOf(sPeerID));
 	}
 	
 	public void updateBitfield(int senderPeerID, int msgType, byte[] payload) {
@@ -514,8 +516,16 @@ public class peerProcess extends peerData {
 		internalBitfield.set(index);
 	}
 	
-	public void updateInteresting(int senderPeerID /*sender's bitfield*/) {
-		BitSet theirs = this.peerDict.get(senderPeerID).bitfield;
+	public void updateInteresting(int senderPeerID) {
+		BitSet theirs = (BitSet) this.peerDict.get(senderPeerID).bitfield.clone();
+		BitSet ours = (BitSet) internalBitfield.clone();
+		ours.flip(0, this.numberOfPieces);
+		ours.and(theirs);
+		if(ours.cardinality() > 0){
+			addInteresting(senderPeerID);
+		} else {
+			removeInteresting(senderPeerID);
+		}
 		//compare personal bitfield and sender's bitfield
 		//set sender's interesting variable to true or false
 	}
@@ -560,7 +570,7 @@ public class peerProcess extends peerData {
 	private void sendInterested(int localPID)
 	{
 		// send the interested message
-		this.updateInteresting(localPID);
+		//this.updateInteresting(localPID);
 		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,2};
