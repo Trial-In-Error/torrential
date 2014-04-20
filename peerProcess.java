@@ -4,8 +4,6 @@ import java.util.*;
 import java.net.*;
 import java.lang.*;
 
-
-
 /* Important notes & things to do:
 		1. Remove the entry for "ourself" from the peerDict
 		2. setupConnections => needs to initiate handshakes properly
@@ -38,7 +36,7 @@ public class peerProcess extends peerData {
 	// name of file to be sent / received
 	// needs set to value from Common.cfg!
 	private String fileName = "";
-
+	private File downloadFile;
 	// size of file to be sent / received, in bytes
 	// needs set to value from Common.cfg!
 	private int fileSize = 0;
@@ -111,8 +109,6 @@ public class peerProcess extends peerData {
 				localPeer.buildMessage(entry.getValue());
 				//System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
 			}
-
-
 			
 			/*if (System.currentTimeMillis() > timeUnchoke + 1000*localPeer.unchokingInterval) {
 				
@@ -270,6 +266,7 @@ public class peerProcess extends peerData {
 		//this.f = new File("peer_"+String.valueOf(this.peerID));
 		try {
 	    	this.file = new File(this.f, "./peer_["+ID+"]/log_peer_["+String.valueOf(this.peerID)+"].log");
+			this.downloadFile = new File(this.f, fileName);
 	    	System.out.println("AUGH!");
 			//FileWriter temp = new FileWriter(this.file, true);
 			this.bw = new BufferedWriter(new FileWriter(this.file, false));
@@ -375,7 +372,7 @@ public class peerProcess extends peerData {
 				log(this.peerID, 2, -1);
 				break;
 			//bitfield
-			case 1:	updateBitfield(senderPeerID /*Pass a bitfield as well*/);
+			case 1:	updateBitfield(senderPeerID, 0, payload);
 				updateInteresting(senderPeerID);
 				if (interestingList.contains(senderPeerID))
 					sendInterested(senderPeerID);
@@ -401,9 +398,7 @@ public class peerProcess extends peerData {
 			case 5:	log(senderPeerID, 9, -1);
 				removeInterested(senderPeerID);
 			//have
-			case 6:	buf = ByteBuffer.wrap(payload);
-						index = buf.getInt(5);
-				updateBitfield(senderPeerID);
+			case 6:	updateBitfield(senderPeerID, 1, payload);
 				// is this REALLY a case of updateInteresting?
 				// it was "interestStatus = get_interest_status" before
 				 updateInteresting(senderPeerID);
@@ -473,8 +468,19 @@ public class peerProcess extends peerData {
 		senderList.remove(sPeerID);
 	}
 	
-	public void updateBitfield(int senderPeerID) {
-		//work
+	public void updateBitfield(int senderPeerID, int msgType, byte[] payload) {
+		//msgType is 0 if payload is bitfield and 1 if payload is have index
+		peerData tmpPeer = this.peerDict.get(senderPeerID);
+		BitSet bits = tmpPeer.bitfield;
+		
+		ByteBuffer buf = ByteBuffer.wrap(payload);
+		int num = buf.getInt(0);
+		if(msgType == 0) {
+			if(num >0)
+				bits.set(0,numberOfPieces);
+		}
+		else
+			bits.set(num);	
 	}
 	
 	public void updateMyBitfield() {
@@ -522,7 +528,6 @@ public class peerProcess extends peerData {
 		}
 	}
 
-
 	private void sendInterested(int localPID)
 	{
 		// send the interested message
@@ -558,7 +563,6 @@ public class peerProcess extends peerData {
 			System.out.println("SEND NOT INTERESTED");
 			System.exit(-1);
 
-			
 		}
 	
 	}
@@ -767,7 +771,6 @@ public class peerProcess extends peerData {
 		}
 		
 	}
-	
 	
 	private void optimisticUnchokingUpdate() {
 		List<peerData> peers = new ArrayList<peerData>(peerDict.values());
