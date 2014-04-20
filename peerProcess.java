@@ -126,7 +126,10 @@ public class peerProcess extends peerData {
 
 	private void buildMessage(peerData entry) {
 		try{
-			System.out.println(entry.inboundStream.available());
+			if(entry.inboundStream.available() > 0)
+			{
+				System.out.println("Bytes waiting to be processed: "+entry.inboundStream.available());
+			}
 			if(entry.inboundStream.available() >= 5)
 			{
 				byte[] temp = new byte[5];
@@ -142,7 +145,7 @@ public class peerProcess extends peerData {
 					System.out.println("This here's a handshake we just received.");
 					byte[] garbage = new byte[27];
 					entry.inboundStream.read(garbage, 0, 27);
-					handleMessage(0, entry.ID, null);
+					handleMessage(8, entry.ID, null);
 				} else {
 					ByteBuffer buf = ByteBuffer.wrap(temp);
 					int tempLength = buf.getInt(0);
@@ -152,9 +155,23 @@ public class peerProcess extends peerData {
 						//compile time error!
 						payload = null;
 					}
-					//int tempType = (int)temp[4];
-					int tempType = 1;
+					int tempType = (int)temp[4];
 					System.out.println("Just received a message of type "+tempType+" and length "+tempLength);
+					if(payload!=null)
+					{
+						System.out.println("Payload length: "+payload.length);
+						System.out.print("[");
+						for(int i = 0; i < payload.length; i++)
+						{
+							if(payload[i]!=(byte)0)
+							{
+								System.out.print(payload[i]);
+								System.out.print(", ");
+							}
+						}
+						System.out.print("]\n");
+						
+					}
 					handleMessage(tempType, entry.ID, payload);
 				}
 			}
@@ -329,6 +346,7 @@ public class peerProcess extends peerData {
 					peer.outboundStream = outboundStream;
 					// INITIATE THE HANDSHAKE!!
 					this.sendHandshake(peer.ID);
+					peer.initiatedHandshake = true;
 					this.log(peer.ID, 1, -1);
 				}
 				catch(IOException ex) {
@@ -362,7 +380,7 @@ public class peerProcess extends peerData {
 		//msg_type = extract from message
 		switch (messageType) {
 			//handshake
-			case 0:
+			case 8:
 				if(peerDict.get(senderPeerID).initiatedHandshake)
 				{
 					sendBitfield(senderPeerID);
@@ -372,33 +390,39 @@ public class peerProcess extends peerData {
 				log(this.peerID, 2, -1);
 				break;
 			//bitfield
-			case 1:	updateBitfield(senderPeerID, 0, payload);
+			case 5:
+				updateBitfield(senderPeerID, 0, payload);
 				updateInteresting(senderPeerID);
-				if (interestingList.contains(senderPeerID))
-					sendInterested(senderPeerID);
-				else
-					sendNotInterested(senderPeerID);
+				if (!this.peerDict.get(senderPeerID).initiatedHandshake){
+					sendBitfield(senderPeerID);
+				} else{
+					if (interestingList.contains(senderPeerID)){
+						sendInterested(senderPeerID);
+					} else {
+						sendNotInterested(senderPeerID);
+					}
+				}
 				log(this.peerID, 2, -1);
 				break;
 			//choke
-			case 2:	log(senderPeerID, 6, -1);
+			case 0:	log(senderPeerID, 6, -1);
 				removeSender(senderPeerID);
 				break;
 			//unchoke
-			case 3:	log(senderPeerID, 5, -1);
+			case 1:	log(senderPeerID, 5, -1);
 				addSender(senderPeerID);
 				//fix input types
 				sendRequest(senderPeerID, 0);
 				break;
 			//interested
-			case 4:	log(senderPeerID, 8, -1);
+			case 2:	log(senderPeerID, 8, -1);
 				addInterested(senderPeerID);
 				break;
 			//not interested
-			case 5:	log(senderPeerID, 9, -1);
+			case 3:	log(senderPeerID, 9, -1);
 				removeInterested(senderPeerID);
 			//have
-			case 6:	updateBitfield(senderPeerID, 1, payload);
+			case 4:	updateBitfield(senderPeerID, 1, payload);
 				// is this REALLY a case of updateInteresting?
 				// it was "interestStatus = get_interest_status" before
 				 updateInteresting(senderPeerID);
@@ -416,13 +440,13 @@ public class peerProcess extends peerData {
 				}
 				break;
 			//request
-			case 7:	buf = ByteBuffer.wrap(payload);
+			case 6:	buf = ByteBuffer.wrap(payload);
 						//get index or payload starting from byte 5 of message
 						index = buf.getInt(5);
 			sendPiece(senderPeerID /*,x*/);
 				break;
 			//piece
-			case 8:
+			case 7:
 				buf = ByteBuffer.wrap(payload);
 				index = buf.getInt(5);
 				insertPiece(index, payload);
@@ -444,7 +468,7 @@ public class peerProcess extends peerData {
 
 	private void removeInterested(int localPeerID)
 	{
-		interestedList.remove(localPeerID);
+		interestedList.remove(Integer.valueOf(localPeerID));
 	}
 
 	private void addInteresting(int localPeerID)
@@ -472,7 +496,9 @@ public class peerProcess extends peerData {
 		//msgType is 0 if payload is bitfield and 1 if payload is have index
 		peerData tmpPeer = this.peerDict.get(senderPeerID);
 		BitSet bits = tmpPeer.bitfield;
-		
+		/*if(payload == null){
+			return;
+		}*/
 		ByteBuffer buf = ByteBuffer.wrap(payload);
 		int num = buf.getInt(0);
 		if(msgType == 0) {
@@ -552,7 +578,7 @@ public class peerProcess extends peerData {
 	private void sendNotInterested(int localPID)
 	{
 		// send the notInterested message
-		this.interestedList.remove(localPID);
+		this.interestedList.remove(Integer.valueOf(localPID));
 		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,3};
@@ -668,7 +694,7 @@ public class peerProcess extends peerData {
 	private void sendHandshake(int localPID)
 	{
 		peerData temp = peerDict.get(localPID);
-		temp.initiatedHandshake = true;
+		//temp.initiatedHandshake = true;
 		// send the handshake
 
 		//temp.outboundStream.write(/*handshake-header, zero bits, PID*/);
