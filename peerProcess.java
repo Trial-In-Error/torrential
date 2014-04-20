@@ -2,7 +2,6 @@ import java.io.*;
 import java.nio.*;
 import java.util.*;
 import java.net.*;
-import java.nio.*;
 import java.lang.*;
 
 
@@ -343,6 +342,7 @@ public class peerProcess extends peerData {
 	}
 
 	public void handleMessage(int messageType, int senderPeerID, byte[] payload) {
+
 		//actions in response to receiving message
 		//unpack message and get msg type, here, assume type is int
 		// STUBS FOR COMPILATION PURPOSES
@@ -351,7 +351,8 @@ public class peerProcess extends peerData {
 
 		//int senderPeerID = 0;
 		int stub = 0;
-		
+		int index; //payload of request and have
+		ByteBuffer buf;
 		
 		
 		//msg_type = extract from message
@@ -392,7 +393,9 @@ public class peerProcess extends peerData {
 			case 5:	log(senderPeerID, 9, -1);
 				removeInterested(senderPeerID);
 			//have
-			case 6:	updateBitfield(senderPeerID);
+			case 6:	buf = ByteBuffer.wrap(message);
+						index = buf.getInt(5);
+				updateBitfield(senderPeerID);
 				// is this REALLY a case of updateInteresting?
 				// it was "interestStatus = get_interest_status" before
 				 updateInteresting(senderPeerID);
@@ -410,10 +413,17 @@ public class peerProcess extends peerData {
 				}
 				break;
 			//request
-			case 7:	sendPiece(senderPeerID /* fix later */);
+			case 7:	buf = ByteBuffer.wrap(message);
+						//get index or payload starting from byte 5 of message
+						index = buf.getInt(5);
+			sendPiece(senderPeerID /*,x*/);
 				break;
 			//piece
-			case 8:	updateMyBitfield();
+			case 8:	
+				buf = ByteBuffer.wrap(message);
+				index = buf.getInt(5);
+				//put piece into right place in file
+				updateMyBitfield();
 				sendHave(1,4);	//method will send to all peers
 				peerDict.get(senderPeerID).piecesSinceLastRound++;
 				updateInteresting(senderPeerID);
