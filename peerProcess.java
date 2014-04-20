@@ -136,11 +136,17 @@ public class peerProcess extends peerData {
 				byte[] temp = new byte[5];
 				byte[] payload = new byte[32768];
 				entry.inboundStream.read(temp, 0, 5);
+				for(int i = 0; i < 5; i++){
+					System.out.println(temp[i]+",   "+(char)temp[i]);
+				}
 				if(temp[0] == (byte)'H' && temp[1] == (byte)'E' && temp[2] == (byte)'L'
 					&& temp[3] == (byte)'L' && temp[4] == (byte) 'O'){
 					// note: ID is calculated from socket, NOT from the actual message
 					// the message's ID field can be bogus...
-					handleMessage(8, entry.ID, null);
+					System.out.println("This here's a handshake we just received.");
+					byte[] garbage = new byte[27];
+					entry.inboundStream.read(garbage, 0, 27);
+					handleMessage(0, entry.ID, null);
 				} else {
 					ByteBuffer buf = ByteBuffer.wrap(temp);
 					int tempLength = buf.getInt(0);
@@ -150,13 +156,15 @@ public class peerProcess extends peerData {
 						//compile time error!
 						payload = null;
 					}
-					int tempType = (int)temp[4];
+					//int tempType = (int)temp[4];
+					int tempType = 1;
+					System.out.println("Just received a message of type "+tempType+" and length "+tempLength);
 					handleMessage(tempType, entry.ID, payload);
 				}
 			}
 		} catch( Exception e) {
-			System.out.println("Error in build message; couldn't read from stream.");
-			//e.printStackTrace();
+			System.out.println("Error in build message; maybe stream writing to null byte[] buffer?");
+			e.printStackTrace();
 			System.exit(-1);
 		}
 	}
@@ -165,7 +173,7 @@ public class peerProcess extends peerData {
 		this.setupConstants();
 		this.setupConnections();
 		this.setupPieces();
-		this.f.mkdirs();
+		//this.f.mkdirs();
 	}
 
 	public void setupConstants() {
@@ -198,6 +206,8 @@ public class peerProcess extends peerData {
 		String host_Temp = null;
 		int port_Temp = 0;
 		int hasFile_Temp = 0;
+		setupDirectory(peerID_Temp);
+		setupLogFiles(peerID_Temp);
 		try {
 			Scanner sc = new Scanner(file2);
 			while (sc.hasNext()) {
@@ -205,9 +215,6 @@ public class peerProcess extends peerData {
 				host_Temp = sc.next();
 				port_Temp = sc.nextInt();
 				hasFile_Temp = sc.nextInt();
-				
-				setupDirectory(peerID_Temp);
-				setupLogFiles(peerID_Temp);
 				
 				if(peerID_Temp != this.peerID)
 				{
@@ -267,11 +274,11 @@ public class peerProcess extends peerData {
 			//FileWriter temp = new FileWriter(this.file, true);
 			this.bw = new BufferedWriter(new FileWriter(this.file, false));
 			this.bw.write("Log File for peer "+ID+" has been generated.\n");
-			//this.bw.flush();
+			this.bw.flush();
 			System.out.println("UGH!");
-			this.log(1, 1, 1);
-			this.log(2, 2, 2);
-			this.log(3, 3, 3);
+			//this.log(1, 1, 1);
+			//this.log(2, 2, 2);
+			//this.log(3, 3, 3);
 		} catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			System.exit(-1);
@@ -303,7 +310,7 @@ public class peerProcess extends peerData {
 					// Pack the peerData object with the new data streams
 					peer.inboundStream = inboundStream;
 					peer.outboundStream = outboundStream;
-					this.log(this.peerID, 1, -1);
+					this.log(peer.ID, 1, -1);
 				}
 				catch(IOException ex) {
 					System.err.println(ex);
@@ -325,7 +332,7 @@ public class peerProcess extends peerData {
 					peer.outboundStream = outboundStream;
 					// INITIATE THE HANDSHAKE!!
 					this.sendHandshake(peer.ID);
-					this.log(this.peerID, 1, -1);
+					this.log(peer.ID, 1, -1);
 				}
 				catch(IOException ex) {
 					System.err.println(ex);
@@ -374,6 +381,7 @@ public class peerProcess extends peerData {
 					sendInterested(senderPeerID);
 				else
 					sendNotInterested(senderPeerID);
+				log(this.peerID, 2, -1);
 				break;
 			//choke
 			case 2:	log(senderPeerID, 6, -1);
@@ -419,7 +427,7 @@ public class peerProcess extends peerData {
 			sendPiece(senderPeerID /*,x*/);
 				break;
 			//piece
-			case 8:	
+			case 8:
 				buf = ByteBuffer.wrap(payload);
 				index = buf.getInt(5);
 				insertPiece(index, payload);
@@ -635,7 +643,7 @@ public class peerProcess extends peerData {
 		byte[] b = new byte[32];
 		String str = "HELLO"+"00000000000000000000000";
 		String str2 = String.valueOf(peerID);
-		while(str.length() != 4) {
+		while(str2.length() != 4) {
 			str2 = "0"+str2;
 		}
 		str = str+str2;

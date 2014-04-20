@@ -4,3 +4,9 @@
 # Ignore sublime generated files
 *.sublime-project
 *.sublime-workspace
+
+# Ignore log files
+peer_*
+
+# Ignore my test files
+out.txt
