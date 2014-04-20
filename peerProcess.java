@@ -249,6 +249,7 @@ public class peerProcess extends peerData {
 	}
 	
 	private void setupPieces() {
+		//an array for holding the payloads of piece messages - 4-byte index + contents
 		pieces = new byte[numberOfPieces][pieceSize + 4];
 		File tempFile = new File(fileName);
 		try {
@@ -443,14 +444,14 @@ public class peerProcess extends peerData {
 			case 6:	buf = ByteBuffer.wrap(payload);
 						//get index or payload starting from byte 5 of message
 						index = buf.getInt(5);
-			sendPiece(senderPeerID /*,x*/);
+			sendPiece(senderPeerID, index);
 				break;
 			//piece
 			case 7:
 				buf = ByteBuffer.wrap(payload);
 				index = buf.getInt(5);
 				insertPiece(index, payload);
-				updateMyBitfield();
+				updateMyBitfield(index);
 				sendHave(1,4);	//method will send to all peers
 				peerDict.get(senderPeerID).piecesSinceLastRound++;
 				updateInteresting(senderPeerID);
@@ -509,8 +510,8 @@ public class peerProcess extends peerData {
 			bits.set(num);	
 	}
 	
-	public void updateMyBitfield() {
-		//work
+	public void updateMyBitfield(int index) {
+		internalBitfield.set(index);
 	}
 	
 	public void updateInteresting(int senderPeerID /*sender's bitfield*/) {
@@ -685,10 +686,35 @@ public class peerProcess extends peerData {
 		}
 	}
 
-	private void sendPiece(int localPID)
+	private void sendPiece(int localPID, int index)
 	{
-		// send the piece
-
+		//index is from the request message that was received
+		//retrieve piece
+		byte[] piece = pieces[index];
+		/*if sending the last piece and it is a shorter piece, cut off the extra bytes(will read as -1) that aren't supposed to be part of the piece, this assumes that the last byte of the piece isn't -1*/
+		int tmpIndex = pieceSize-1;
+		if(index == numberOfPieces-1) {
+			
+			while(piece[tmpIndex] == -1) {
+				tmpIndex--;
+			}
+		}
+		byte[] msg = new byte[tmpIndex+5];
+		ByteBuffer buf = ByteBuffer.wrap(msg);
+		//message length is tmpIndex-4+1
+		buf.putInt(tmpIndex-1);
+		//message type
+		msg[5] = (byte)7;
+		System.arraycopy(piece, 0, msg, 5, tmpIndex+1);
+		peerData temp = peerDict.get(localPID);
+		try {
+			temp.outboundStream.write(msg, 0, msg.length);
+		}
+		catch(IOException e) {
+			System.out.println("Error in sendPiece().");
+			//e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 
 	private void sendHandshake(int localPID)
