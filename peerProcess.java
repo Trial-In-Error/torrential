@@ -82,33 +82,40 @@ public class peerProcess extends peerData {
 	private int portNumber = 0;
 	
 	//file within peer process directory ../peer [peerID]/
-	private File f = new File("peer_"+String.valueOf(peerID));
+	private File f;
 
-	private File file = new File(f, "log_peer_["+String.valueOf(peerID)+"].log");
+	private File file;
+
+	private BufferedWriter bw;
 
 	public static void main(String [] args) {
-	
 		peerProcess localPeer = new peerProcess();
 		try {
     		localPeer.peerID = Integer.parseInt(args[0]);
+ //   		localPeer.f = new File("peer_"+String.valueOf(localPeer.peerID));
+  //  		localPeer.file = new File(localPeer.f, "log_peer_["+String.valueOf(localPeer.peerID)+"].log");
+    		//peerID = localPeer.peerID;
 		} catch (IndexOutOfBoundsException e) {
     		System.out.println("Please pass in a PeerID!");
     		System.exit(1);
 		}
 		localPeer.initialize();
+		//localPeer.log(1, 1, 1);
+		//localPeer.log(1, 2, 1);
+		//localPeer.log(1, 3, 1);
 		long timeUnchoke = System.currentTimeMillis();
 		long timeOp = System.currentTimeMillis();
 		while(true){
 
 			for (Map.Entry<Integer, peerData> entry : localPeer.peerDict.entrySet()) {
-				// construct a message from the byte stream coming in, then pass it to handlemessage
+				// construct a message from the byte stream coming in, then pass it to handleMessage
 				localPeer.buildMessage(entry.getValue());
 				//System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
 			}
 
 
 			
-			if (System.currentTimeMillis() > timeUnchoke + 1000*localPeer.unchokingInterval) {
+			/*if (System.currentTimeMillis() > timeUnchoke + 1000*localPeer.unchokingInterval) {
 				
 				localPeer.unchokingUpdate();
 				timeUnchoke = System.currentTimeMillis();
@@ -118,12 +125,13 @@ public class peerProcess extends peerData {
 			
 				localPeer.optimisticUnchokingUpdate();
 				timeOp = System.currentTimeMillis();
-			}
+			}*/
 		}		
 	}
 
 	private void buildMessage(peerData entry) {
 		try{
+			System.out.println(entry.inboundStream.available());
 			if(entry.inboundStream.available() >= 5)
 			{
 				byte[] temp = new byte[5];
@@ -149,21 +157,16 @@ public class peerProcess extends peerData {
 			}
 		} catch( Exception e) {
 			System.out.println("Error in build message; couldn't read from stream.");
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.exit(-1);
 		}
 	}
 
 	private void initialize() {
-		setupConstants();
-		setupConnections();
-		setupPieces();
-		f.mkdirs();
-		try {
-			file.createNewFile();
-		}
-		catch (IOException e) {
-			e.printStackTrace();		
-		}
+		this.setupConstants();
+		this.setupConnections();
+		this.setupPieces();
+		this.f.mkdirs();
 	}
 
 	public void setupConstants() {
@@ -187,10 +190,12 @@ public class peerProcess extends peerData {
 			scanner.close();
 		}
 		catch (FileNotFoundException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println("Error in setupConstants; couldn't read config files.");
+			System.exit(-1);
 		}
 		
-		int peerID_Temp = 0;
+		int peerID_Temp = this.peerID;
 		String host_Temp = null;
 		int port_Temp = 0;
 		int hasFile_Temp = 0;
@@ -212,11 +217,7 @@ public class peerProcess extends peerData {
 					this.peerDict.put(peerID_Temp, tempObject);
 				}else{
 					this.portNumber = port_Temp;
-				}
-
-
-				//shouldn't the close be outside this pair of braces? like, down a line?
-			
+				}	
 			}
 			sc.close();
 		}
@@ -250,24 +251,38 @@ public class peerProcess extends peerData {
 			fs.close();
 		}
 		catch( Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println("Error in setupPieces.");
+			System.exit(-1);
 		}
 	}
 	private void setupDirectory(int ID) {
-		File dir = new File("/peer_[ID]");
-		dir.mkdir();
+		//File dir = new File("/peer_["+ID+"]");
+		//dir.mkdir();
+
+		new File("./peer_["+ID+"]").mkdirs();
+		//this.f = new File("peer_"+String.valueOf(this.peerID));
+		try {
+	    	this.file = new File(this.f, "./peer_["+ID+"]/log_peer_["+String.valueOf(this.peerID)+"].log");
+	    	System.out.println("AUGH!");
+			//FileWriter temp = new FileWriter(this.file, true);
+			this.bw = new BufferedWriter(new FileWriter(this.file, false));
+			this.bw.write("Log File for peer "+ID+" has been generated.\n");
+			//this.bw.flush();
+			System.out.println("UGH!");
+			this.log(1, 1, 1);
+			this.log(2, 2, 2);
+			this.log(3, 3, 3);
+		} catch(Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			System.exit(-1);
+		}
 	}
 	
 	private void setupLogFiles(int ID) {
-		try {
-			FileWriter fstream = new FileWriter("log_peer_[ID].log");
-			BufferedWriter out = new BufferedWriter(fstream);
-			out.write("Log File for peer "+ID+" has been generated.");
-			out.close();
-		}
-		catch(Exception e) {
-			System.err.println("Error: " + e.getMessage());
-		}
+			//file.createNewFile();
+			//out.close();	
+
 	}
 	
 	private void setupConnections() {
@@ -289,9 +304,11 @@ public class peerProcess extends peerData {
 					// Pack the peerData object with the new data streams
 					peer.inboundStream = inboundStream;
 					peer.outboundStream = outboundStream;
+					this.log(this.peerID, 1, -1);
 				}
 				catch(IOException ex) {
 					System.err.println(ex);
+					System.exit(-1);
 				}
 			}
 			//if we appear second, then we must send (client)
@@ -313,6 +330,7 @@ public class peerProcess extends peerData {
 				}
 				catch(IOException ex) {
 					System.err.println(ex);
+					System.exit(-1);
 				}
 			}
 			// otherwise, it's the entry for us - oops - this shouldn't exist
@@ -464,7 +482,7 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND CHOKE FAILED");
-			
+			System.exit(-1);
 		}
 		
 	}
@@ -482,6 +500,7 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND UNCHOKE FAILED");
+			System.exit(-1);
 		}
 	}
 
@@ -500,7 +519,7 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND INTERESTED FAILED");
-
+			System.exit(-1);
 			
 		}
 	}
@@ -519,6 +538,7 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND NOT INTERESTED");
+			System.exit(-1);
 
 			
 		}
@@ -539,6 +559,7 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND HAVE BYTE MANIP FAILED");
+			System.exit(-1);
 		}
 		
 		byte[] c = outputStream.toByteArray();
@@ -550,6 +571,7 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND HAVE FAILED");
+			System.exit(-1);
 		}
 	}
 
@@ -571,6 +593,7 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND REQUEST BYTE MANIP FAILED");
+			System.exit(-1);
 		}
 		
 		byte[] c = outputStream.toByteArray();
@@ -581,6 +604,7 @@ public class peerProcess extends peerData {
 		catch(IOException ex) {
 			System.out.println(ex.toString());
 			System.out.println("SEND REQ FAILED");
+			System.exit(-1);
 		}
 	}
 
@@ -610,7 +634,9 @@ public class peerProcess extends peerData {
 			temp.outboundStream.write(b, 0, b.length);
 		}
 		catch(IOException e) {
-			e.printStackTrace();
+			System.out.println("Error in sendHandshake; could not write to stream.");
+			//e.printStackTrace();
+			System.exit(-1);
 		}
 
 	}
@@ -647,15 +673,13 @@ public class peerProcess extends peerData {
 		GregorianCalendar cal = new GregorianCalendar();
 		
 		try {
-			
-			BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
 
 			switch (event) {
 				case 1:	msg = "["+time()+"]: "+"Peer ["+myID+"] makes a connection to Peer ["+lPID+"].";
 					break;
 				case 2: msg =  "["+time()+"]: "+"Peer ["+myID+"] is connected from ["+lPID+"].";
 					break;
-				case 3:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the preferred neighbors ["+neighborList+"].";
+				case 3:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the preferred neighbors ["+this.neighborList+"].";
 					break;
 				case 4:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the optimistically-unchoked neighbor ["+lPID+"].";
 					break;
@@ -673,11 +697,15 @@ public class peerProcess extends peerData {
 					break;
 				default: msg = "-1";//exception
 			}
-			bw.write(msg);
-			bw.close();
+			msg = msg+"\n";
+			this.bw.write(msg);
+			this.bw.flush();
+			//this.bw.close();
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Error in logging.");
+			//e.printStackTrace();
+			System.exit(-1);
 		}
 			
 	}
