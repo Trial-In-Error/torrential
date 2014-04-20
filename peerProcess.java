@@ -562,7 +562,7 @@ public class peerProcess extends peerData {
 	private void sendHave(int localPID, int pieceID)
 	{
 	
-		byte[] a = new byte[]{0,0,0,1,4};
+		byte[] a = new byte[]{0,0,0,5,4};
 		peerData temp = peerDict.get(localPID);
 		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -591,7 +591,31 @@ public class peerProcess extends peerData {
 
 	private void sendBitfield(int localPID)
 	{
-		// send the bitfield
+		//sends all 0's or all 1's because our situation is that no one joins late, have to change this to send current bitfield for peers entering late
+		peerData temp = peerDict.get(localPID);
+		byte[] msg = new byte[9];
+		//message length is 5
+		ByteBuffer buf = ByteBuffer.wrap(msg);
+		buf.putInt(5);
+		
+		//can only change position back before current position, can't do forward
+		buf.position(5);
+		msg[4] = (byte)5;
+		//bitfield is empty - all 0's
+		if(internalBitfield.length() == 0) 
+			buf.putInt(0);
+		else
+		//bitfield is full so all 1's in payload
+			buf.putInt(65535);
+
+		try {
+			temp.outboundStream.write(msg,0,msg.length);
+		}
+		catch(IOException ex) {
+			System.out.println(ex.toString());
+			System.out.println("SEND BITFIELD FAILED");
+			System.exit(-1);
+		}
 	}
 
 	private void sendRequest(int localPID, int pieceID)
