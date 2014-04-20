@@ -93,17 +93,20 @@ public class peerProcess extends peerData {
     		localPeer.peerID = Integer.parseInt(args[0]);
 		} catch (IndexOutOfBoundsException e) {
     		System.out.println("Please pass in a PeerID!");
-    		//System.exit(1);
+    		System.exit(1);
 		}
 		localPeer.initialize();
 		long timeUnchoke = System.currentTimeMillis();
 		long timeOp = System.currentTimeMillis();
 		while(true){
-			//for each peer:
-			//implement as for-each loop on peerDict
-				//http://www.javapractices.com/topic/TopicAction.do?Id=196
-			//for(PeerData peer : peerDict){};
-				//handle_message();
+
+			for (Map.Entry<Integer, peerData> entry : localPeer.peerDict.entrySet()) {
+				// construct a message from the byte stream coming in, then pass it to handlemessage
+				localPeer.buildMessage(entry.getValue());
+				//System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+			}
+
+
 			
 			if (System.currentTimeMillis() > timeUnchoke + 1000*localPeer.unchokingInterval) {
 				
@@ -116,38 +119,38 @@ public class peerProcess extends peerData {
 				localPeer.optimisticUnchokingUpdate();
 				timeOp = System.currentTimeMillis();
 			}
-			
-			
-		}
-	
-		
-		//need to place the class elsewhere to run the rest of the class methods while doing this 
+		}		
+	}
 
-		/*class unchoking extends TimerTask {
-
-			public void run() {
-				//analyze rate of transmission from each preferred neighbor and choke/unchoke appropriately
-				//log(-1, 3, -1);
+	private void buildMessage(peerData entry) {
+		try{
+			if(entry.inboundStream.available() >= 5)
+			{
+				byte[] temp = new byte[5];
+				byte[] payload = new byte[32768];
+				entry.inboundStream.read(temp, 0, 5);
+				if(temp[0] == (byte)'H' && temp[1] == (byte)'E' && temp[2] == (byte)'L'
+					&& temp[3] == (byte)'L' && temp[4] == (byte) 'O'){
+					// note: ID is calculated from socket, NOT from the actual message
+					// the message's ID field can be bogus...
+					handleMessage(8, entry.ID, null);
+				} else {
+					ByteBuffer buf = ByteBuffer.wrap(temp);
+					int tempLength = buf.getInt(0);
+					if(tempLength > 1){
+						entry.inboundStream.read(payload, 0, tempLength-1);
+					} else {
+						//compile time error!
+						payload = null;
+					}
+					int tempType = (int)temp[4];
+					handleMessage(tempType, entry.ID, payload);
+				}
 			}
+		} catch( Exception e) {
+			System.out.println("Error in build message; couldn't read from stream.");
+			e.printStackTrace();
 		}
-		Timer timer = new Timer();
-		timer.schedule(new unchoking(), 0, 2*1000);
-		timer.cancel();*/
-		
-		//need to place elsewhere so that both unchoking() and optimisticUnchoking() can both work
-		/*class optimisticUnchoking extends TimerTask {
-			public void run() {
-				//unchoke optimistically
-				log(-1, 4, -1);
-			}
-		}
-		Timer optimisticTimer = new Timer();
-		optimisticTimer.schedule(new optimisticUnchoking(), 0, 5*1000);
-		optimisticTimer.cancel(); */
-		
-		//do timer.cancel() wherever you end peerProcess or another method	
-		
-		
 	}
 
 	private void initialize() {
@@ -321,14 +324,14 @@ public class peerProcess extends peerData {
 		}
 	}
 
-	public void handleMessage(/*pass in message*/) {
+	public void handleMessage(int messageType, int senderPeerID, byte[] payload) {
 		//actions in response to receiving message
 		//unpack message and get msg type, here, assume type is int
 		// STUBS FOR COMPILATION PURPOSES
-		int messageType = 0;
+		//int messageType = 0;
 		int interestStatus = 0;
 
-		int senderPeerID = 0;
+		//int senderPeerID = 0;
 		int stub = 0;
 		
 		
