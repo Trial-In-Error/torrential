@@ -393,7 +393,7 @@ public class peerProcess extends peerData {
 			case 5:	log(senderPeerID, 9, -1);
 				removeInterested(senderPeerID);
 			//have
-			case 6:	buf = ByteBuffer.wrap(message);
+			case 6:	buf = ByteBuffer.wrap(payload);
 						index = buf.getInt(5);
 				updateBitfield(senderPeerID);
 				// is this REALLY a case of updateInteresting?
@@ -413,16 +413,16 @@ public class peerProcess extends peerData {
 				}
 				break;
 			//request
-			case 7:	buf = ByteBuffer.wrap(message);
+			case 7:	buf = ByteBuffer.wrap(payload);
 						//get index or payload starting from byte 5 of message
 						index = buf.getInt(5);
 			sendPiece(senderPeerID /*,x*/);
 				break;
 			//piece
 			case 8:	
-				buf = ByteBuffer.wrap(message);
+				buf = ByteBuffer.wrap(payload);
 				index = buf.getInt(5);
-				//put piece into right place in file
+				insertPiece(index, payload);
 				updateMyBitfield();
 				sendHave(1,4);	//method will send to all peers
 				peerDict.get(senderPeerID).piecesSinceLastRound++;
@@ -779,5 +779,17 @@ public class peerProcess extends peerData {
 	
 	}
 	
+	private void insertPiece(int index, byte[] payload) {
+	//insert piece into it's proper place in the file
+		try{
+			RandomAccessFile rf = new RandomAccessFile(fileName, "rw");
+			rf.seek(index);
+			rf.write(payload, 4, pieceSize-4);	
+			rf.close();
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 }
