@@ -132,8 +132,8 @@ public class peerProcess extends peerData {
 			}
 			if(entry.inboundStream.available() >= 5)
 			{
-				byte[] temp = new byte[5];
-				byte[] payload = new byte[32768];
+				byte[] temp = new byte[5];		//message length and type
+				byte[] payload = new byte[pieceSize+4];	
 				entry.inboundStream.read(temp, 0, 5);
 				for(int i = 0; i < 5; i++){
 					System.out.println(temp[i]+",   "+(char)temp[i]);
@@ -163,7 +163,7 @@ public class peerProcess extends peerData {
 						System.out.print("[");
 						for(int i = 0; i < payload.length; i++)
 						{
-							if(payload[i]!=(byte)0)
+							if(true)
 							{
 								System.out.print(payload[i]);
 								System.out.print(", ");
@@ -273,7 +273,9 @@ public class peerProcess extends peerData {
 				for(int j = 4; j<pieceSize+4; j++) {
 					//fill in bytes of the piece
 						//fs.read() will return -1 if reach end of file
+					
 						pieces[i][j] = (byte)fs.read();
+						//System.out.println(pieces[i][j] + " pieces");
 				}
 			}
 			fs.close();
@@ -453,20 +455,23 @@ public class peerProcess extends peerData {
 			//request
 			case 6:	buf = ByteBuffer.wrap(payload);
 						//get index or payload starting from byte 5 of message
-						index = buf.getInt(5);
+						index = buf.getInt(0);
+						System.out.println("index "+index);
 				sendPiece(senderPeerID, index);
 				break;
 			//piece
 			case 7:
 				buf = ByteBuffer.wrap(payload);
-				index = buf.getInt(5);
+				index = buf.getInt(0);
 				insertPiece(index, payload);
 				updateMyBitfield(index);
-				sendHave(1,4);	//method will send to all peers
+				sendHave(senderPeerID,4);	//method will send to all peers so parameter cant be senderPeerID
 				peerDict.get(senderPeerID).piecesSinceLastRound++;
 				updateInteresting(senderPeerID);
-				removeRequestsInFlight(senderPeerID);
+				/*System.out.println("before removerequestsinflight");
+				removeRequestsInFlight(senderPeerID);*/
 				checkCompletion();
+				System.out.println("file complete "+this.fileComplete);
 				break;
 			default://exception
 		}
@@ -621,7 +626,8 @@ public class peerProcess extends peerData {
 	
 		byte[] a = new byte[]{0,0,0,5,4};
 		peerData temp = peerDict.get(localPID);
-		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
+		ByteBuffer buf = ByteBuffer.allocate(4);
+		byte[] b = buf.putInt(pieceID).array();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
 			outputStream.write(a);
@@ -635,8 +641,9 @@ public class peerProcess extends peerData {
 		}
 		
 		byte[] c = outputStream.toByteArray();
-		
-		
+		for(int i = 0;i<c.length;i++) {
+			System.out.println("i is "+i+" c is "+c[i]);
+		}
 		try {
 		temp.outboundStream.write(c,0,c.length);
 		}
@@ -680,7 +687,8 @@ public class peerProcess extends peerData {
 	{
 		byte[] a = new byte[]{0,0,0,5,6};
 		peerData temp = peerDict.get(localPID);
-		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
+		ByteBuffer buf = ByteBuffer.allocate(4);
+		byte[] b = buf.putInt(pieceID).array();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
 			outputStream.write(a);
@@ -711,22 +719,28 @@ public class peerProcess extends peerData {
 		//retrieve piece
 		byte[] piece = pieces[index];
 		/*if sending the last piece and it is a shorter piece, cut off the extra bytes(will read as -1) that aren't supposed to be part of the piece, this assumes that the last byte of the piece isn't -1*/
-		int tmpIndex = pieceSize-1;
+		System.out.println("piece length"+piece.length);
+		int tmpIndex = piece.length-1;
 		if(index == numberOfPieces-1) {
 			
 			while(piece[tmpIndex] == -1) {
 				tmpIndex--;
 			}
 		}
-		byte[] msg = new byte[tmpIndex+5];
+		byte[] msg = new byte[pieceSize+9];
 		ByteBuffer buf = ByteBuffer.wrap(msg);
 		//message length is tmpIndex-4+1
-		buf.putInt(tmpIndex-1);
+		buf.putInt(pieceSize+5);
+		System.out.println("tmpindex"+tmpIndex);
 		//message type
-		msg[5] = (byte)7;
+		msg[4] = (byte)7;
 		System.arraycopy(piece, 0, msg, 5, tmpIndex+1);
+		for(int i = 0;i<msg.length;i++) {
+			System.out.println("msg "+msg[i]);
+		}
 		peerData temp = peerDict.get(localPID);
 		try {
+		
 			temp.outboundStream.write(msg, 0, msg.length);
 		}
 		catch(IOException e) {
@@ -734,6 +748,10 @@ public class peerProcess extends peerData {
 			//e.printStackTrace();
 			System.exit(-1);
 		}
+		/*catch(ArrayIndexOutOfBoundsException a) {
+			System.out.println("tempindex "+tmpIndex);
+			System.out.println("msglength"+msg.length);
+		}*/
 	}
 
 	private void sendHandshake(int localPID)
@@ -903,9 +921,9 @@ public class peerProcess extends peerData {
 	private void insertPiece(int index, byte[] payload) {
 	//insert piece into it's proper place in the file
 		try{
-			RandomAccessFile rf = new RandomAccessFile(fileName, "rw");
+			RandomAccessFile rf = new RandomAccessFile("writefile.txt", "rw");
 			rf.seek(index);
-			rf.write(payload, 4, pieceSize-4);	
+			rf.write(payload, 4, pieceSize);	
 			rf.close();
 		}
 		catch(IOException e) {
