@@ -110,7 +110,7 @@ public class peerProcess extends peerData {
 				//System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
 			}
 			
-			/*if (System.currentTimeMillis() > timeUnchoke + 1000*localPeer.unchokingInterval) {
+			if (System.currentTimeMillis() > timeUnchoke + 1000*localPeer.unchokingInterval) {
 				
 				localPeer.unchokingUpdate();
 				timeUnchoke = System.currentTimeMillis();
@@ -120,7 +120,7 @@ public class peerProcess extends peerData {
 			
 				localPeer.optimisticUnchokingUpdate();
 				timeOp = System.currentTimeMillis();
-			}*/
+			}
 		}		
 	}
 
@@ -214,6 +214,7 @@ public class peerProcess extends peerData {
 			System.out.println("Error in setupConstants; couldn't read config files.");
 			System.exit(-1);
 		}
+		this.numberOfPieces = (int)(this.fileSize / this.pieceSize) + 1;
 		
 		int peerID_Temp = this.peerID;
 		String host_Temp = null;
@@ -236,6 +237,13 @@ public class peerProcess extends peerData {
 					this.peerDict.put(peerID_Temp, tempObject);
 				}else{
 					this.portNumber = port_Temp;
+					if(hasFile_Temp == 1)
+					{
+						this.internalBitfield.set(0, this.numberOfPieces);
+						internalBitfield.set(0, this.numberOfPieces);
+						//System.out.println("internalBitField cardinality: "+this.internalBitfield.get(0));	
+					}
+					System.out.println("internalBitField cardinality: "+this.internalBitfield.cardinality());
 				}	
 			}
 			sc.close();
@@ -413,11 +421,12 @@ public class peerProcess extends peerData {
 			case 1:	log(senderPeerID, 5, -1);
 				addSender(senderPeerID);
 				//fix input types
-				sendRequest(senderPeerID, 0);
+				sendRequest(senderPeerID, 1);
 				break;
 			//interested
 			case 2:	log(senderPeerID, 8, -1);
 				addInterested(senderPeerID);
+				peerDict.get(senderPeerID).isInterested = true;
 				break;
 			//not interested
 			case 3:	log(senderPeerID, 9, -1);
@@ -445,7 +454,7 @@ public class peerProcess extends peerData {
 			case 6:	buf = ByteBuffer.wrap(payload);
 						//get index or payload starting from byte 5 of message
 						index = buf.getInt(5);
-			sendPiece(senderPeerID, index);
+				sendPiece(senderPeerID, index);
 				break;
 			//piece
 			case 7:
@@ -669,7 +678,7 @@ public class peerProcess extends peerData {
 
 	private void sendRequest(int localPID, int pieceID)
 	{
-		byte[] a = new byte[]{0,0,0,1,6};
+		byte[] a = new byte[]{0,0,0,5,6};
 		peerData temp = peerDict.get(localPID);
 		byte[] b = ByteBuffer.allocate(4).putInt(pieceID).array();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -834,7 +843,7 @@ public class peerProcess extends peerData {
 	
 	private void unchokingUpdate() {
 		
-		
+		System.out.println("Entered unchoking update.");
 		List<peerData> sortedPeers = new ArrayList<peerData>(peerDict.values());
 		Collections.sort(sortedPeers, new Comparator<peerData>() {
 		
@@ -843,14 +852,24 @@ public class peerProcess extends peerData {
 			}		
 		});
 			//Send unchoke messages to the best neighbors
-		for (int i = 0; i < numberOfPreferredNeighbors; i++) { 
-			if (sortedPeers.get(i).isChoked) {
-				sendUnchoke(sortedPeers.get(i).ID);
-				peerDict.get(sortedPeers.get(i).ID).isChoked = false;
-			}	if (sortedPeers.get(i).isOptimisticallyUnchoked) {
-					peerDict.get(sortedPeers.get(i).ID).isOptimisticallyUnchoked = false;
+		for (int i = 0; i < sortedPeers.size(); i++)
+		{
+			if(!sortedPeers.get(i).isInterested)
+			{
+				sortedPeers.remove(i);
 			}
-		
+		}
+		if(sortedPeers.size()>0){
+			for (int i = 0; i < numberOfPreferredNeighbors; i++) { 
+				if (sortedPeers.get(i).isChoked) {
+					System.out.println("Unchoking a peer.");
+					sendUnchoke(sortedPeers.get(i).ID);
+					peerDict.get(sortedPeers.get(i).ID).isChoked = false;
+				}	if (sortedPeers.get(i).isOptimisticallyUnchoked) {
+						peerDict.get(sortedPeers.get(i).ID).isOptimisticallyUnchoked = false;
+				}
+			
+			}
 		}
 			//Send Choke to the rest
 		for (int i = numberOfPreferredNeighbors; i < sortedPeers.size(); i++) {
