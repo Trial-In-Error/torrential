@@ -294,7 +294,8 @@ public class peerProcess extends peerData {
 		//this.f = new File("peer_"+String.valueOf(this.peerID));
 		try {
 	    	this.file = new File(this.f, "./peer_["+ID+"]/log_peer_["+String.valueOf(this.peerID)+"].log");
-			this.downloadFile = new File(this.f, fileName);
+			this.downloadFile = new File("./peer_["+ID+"]/output");
+		//	this.downloadFile = new File(this.f, fileName);
 	    	System.out.println("AUGH!");
 			//FileWriter temp = new FileWriter(this.file, true);
 			this.bw = new BufferedWriter(new FileWriter(this.file, false));
@@ -921,8 +922,8 @@ public class peerProcess extends peerData {
 	private void insertPiece(int index, byte[] payload) {
 	//insert piece into it's proper place in the file
 		try{
-			RandomAccessFile rf = new RandomAccessFile("writefile.txt", "rw");
-			rf.seek(index);
+			RandomAccessFile rf = new RandomAccessFile(downloadFile, "rw");
+			rf.seek(index*pieceSize);
 			rf.write(payload, 4, pieceSize);	
 			rf.close();
 		}
