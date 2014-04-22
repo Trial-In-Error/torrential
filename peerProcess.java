@@ -299,7 +299,7 @@ public class peerProcess extends peerData {
 	    	System.out.println("AUGH!");
 			//FileWriter temp = new FileWriter(this.file, true);
 			this.bw = new BufferedWriter(new FileWriter(this.file, false));
-			this.bw.write("Log File for peer "+ID+" has been generated.\n");
+			log(this.peerID, 11, -1);
 			this.bw.flush();
 			System.out.println("UGH!");
 			//this.log(1, 1, 1);
@@ -414,7 +414,7 @@ public class peerProcess extends peerData {
 						sendNotInterested(senderPeerID);
 					}
 				}
-				log(this.peerID, 2, -1);
+				log(this.peerID, 12, -1);
 				break;
 			//choke
 			case 0:	log(senderPeerID, 6, -1);
@@ -800,6 +800,7 @@ public class peerProcess extends peerData {
 		if(tempBitfield.isEmpty() && tempBitfield.size() == this.numberOfPieces)
 		{
 			this.fileComplete = true;
+			log(this.peerID,13,1);
 		}else{
 			this.fileComplete = false;
 		}
@@ -820,7 +821,7 @@ public class peerProcess extends peerData {
 					break;
 				case 2: msg =  "["+time()+"]: "+"Peer ["+myID+"] is connected from ["+lPID+"].";
 					break;
-				case 3:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the preferred neighbors ["+this.neighborList+"].";
+				case 3:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the preferred neighbors "+this.neighborList+".";
 					break;
 				case 4:	msg =  "["+time()+"]: "+"Peer ["+myID+"] has the optimistically-unchoked neighbor ["+lPID+"].";
 					break;
@@ -835,6 +836,12 @@ public class peerProcess extends peerData {
 				case 9:	msg = "["+time()+"]: "+"Peer ["+myID+"] received a 'not interested' message from ["+lPID+"].";
 					break;
 				case 10: msg = "["+time()+"]: "+"Peer ["+myID+"] has downloaded the piece ["+String.valueOf(piece)+"] from ["+lPID+"].";
+					break;
+				case 11: msg = "["+time()+"]: "+"Log File has been generated for Peer "+myID+".";
+					break;
+				case 12: msg = "["+time()+"]: "+"Bitfield update on ["+myID+"]";
+					break;
+				case 13: msg = "["+time()+"]: "+"File has completed downloading on "+myID+"!";
 					break;
 				default: msg = "-1";//exception
 			}
@@ -889,6 +896,7 @@ public class peerProcess extends peerData {
 				}
 			
 			}
+			log(this.peerID,3,1);
 		}
 			//Send Choke to the rest
 		for (int i = numberOfPreferredNeighbors; i < sortedPeers.size(); i++) {
@@ -899,9 +907,11 @@ public class peerProcess extends peerData {
 			
 		}
 		
+		
 	}
 	
 	private void optimisticUnchokingUpdate() {
+		System.out.println("Entered Optimistic Update");
 		List<peerData> peers = new ArrayList<peerData>(peerDict.values());
 		long seed = System.nanoTime();
 		Collections.shuffle(peers, new Random(seed));
@@ -911,7 +921,7 @@ public class peerProcess extends peerData {
 			
 				sendUnchoke(peers.get(i).ID);
 				peerDict.get(peers.get(i).ID).isOptimisticallyUnchoked = true;
-				
+				log(this.peerID,4,1);
 						
 			}
 			
