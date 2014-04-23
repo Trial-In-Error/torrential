@@ -231,6 +231,11 @@ public class peerProcess extends peerData {
 				{
 					peerData tempObject = new peerData(peerID_Temp, host_Temp,
 						port_Temp, hasFile_Temp);
+					System.out.println("Made a new peerData object.");
+					System.out.println("\tPeerID: "+peerID_Temp);
+					System.out.println("\tHostname: "+host_Temp);
+					System.out.println("\tPortNumber: "+port_Temp);
+					System.out.println("\thasFile: "+hasFile_Temp);
 					this.peerDict.put(peerID_Temp, tempObject);
 				}else{
 					this.portNumber = port_Temp;
@@ -317,11 +322,13 @@ public class peerProcess extends peerData {
 		{
 			peerData peer = entry.getValue();
 			// if we appear first, then we must listen (server)
+			//System.out.println("LOL");
 			if(this.peerID < peer.ID)
 			{
 				try {
 					// Create a server socket
-					ServerSocket serverSocket = new ServerSocket(this.portNumber);
+					System.out.println(this.portNumber);
+					ServerSocket serverSocket = new ServerSocket(peer.portNumber);
 					// Listen for a connection request
 					Socket socket = serverSocket.accept();
 					// Create input/output data streams
@@ -345,7 +352,7 @@ public class peerProcess extends peerData {
 				try {
 					// Create a client socket
 					// DO WE USE OUR PORT OR THEIRS? ASSUMING THEIRS!
-					Socket socket = new Socket(peer.hostName, peer.portNumber);
+					Socket socket = new Socket(peer.hostName, this.portNumber);
 					// Create input/output data streams
 					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
 					DataOutputStream outboundStream = new DataOutputStream(socket.getOutputStream());
