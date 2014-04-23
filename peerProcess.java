@@ -452,7 +452,6 @@ public class peerProcess extends peerData {
 			//interested
 			case 2:	log(senderPeerID, 8, -1);
 				addInterested(senderPeerID);
-				peerDict.get(senderPeerID).isInterested = true;
 				break;
 			//not interested
 			case 3:	log(senderPeerID, 9, -1);
@@ -509,11 +508,13 @@ public class peerProcess extends peerData {
 	private void addInterested(int localPeerID)
 	{
 		interestedList.add(localPeerID);
+		this.peerDict.get(localPeerID).isInterested = true;
 	}
 
 	private void removeInterested(int localPeerID)
 	{
 		interestedList.remove(Integer.valueOf(localPeerID));
+		this.peerDict.get(localPeerID).isInterested = false;
 	}
 
 	private void addInteresting(int localPeerID)
@@ -583,6 +584,7 @@ public class peerProcess extends peerData {
 	{
 		// send the choke message
 		this.neighborList.remove(Integer.valueOf(localPID));
+		peerDict.get(localPID).isInterested = false;
 		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,0};
@@ -603,7 +605,6 @@ public class peerProcess extends peerData {
 		// send the unChoke message
 		this.neighborList.add((Integer.valueOf(localPID)));
 		peerData temp = peerDict.get(localPID);
-		
 		byte[] b = new byte[]{0,0,0,1,1};
 		try {
 		temp.outboundStream.write(b,0,b.length);
@@ -638,7 +639,6 @@ public class peerProcess extends peerData {
 	private void sendNotInterested(int localPID)
 	{
 		// send the notInterested message
-		this.interestedList.remove(Integer.valueOf(localPID));
 		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,3};
@@ -949,6 +949,10 @@ public class peerProcess extends peerData {
 			//Send unchoke messages to the best neighbors
 		for (int i = 0; i < sortedPeers.size(); i++)
 		{
+			if(sortedPeers.get(i).ID == this.peerID)
+			{
+				sortedPeers.remove(i);
+			}
 			if(!sortedPeers.get(i).isInterested)
 			{
 				sortedPeers.remove(i);
@@ -985,7 +989,10 @@ public class peerProcess extends peerData {
 		long seed = System.nanoTime();
 		Collections.shuffle(peers, new Random(seed));
 		for (int i = 0; i < peers.size(); i++) {
-			
+			if(peers.get(i).ID == this.peerID)
+			{
+				peers.remove(i);
+			}
 			if(peers.get(i).isChoked && peers.get(i).isInterested) {
 			
 				sendUnchoke(peers.get(i).ID);
