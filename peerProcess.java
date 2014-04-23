@@ -432,10 +432,6 @@ public class peerProcess extends peerData {
 				break;
 			//have
 			case 4:	updateBitfield(senderPeerID, 1, payload);
-				buf = ByteBuffer.wrap(payload);
-				//get index or payload starting from byte 5 of message
-				index = buf.getInt(5);
-				log(senderPeerID, 7, index);
 				// is this REALLY a case of updateInteresting?
 				// it was "interestStatus = get_interest_status" before
 				 updateInteresting(senderPeerID);
@@ -465,7 +461,7 @@ public class peerProcess extends peerData {
 				index = buf.getInt(0);
 				insertPiece(index, payload);
 				updateMyBitfield(index);
-				sendHave(senderPeerID,4);	//method will send to all peers so parameter cant be senderPeerID
+				sendHave(senderPeerID,index);	//method will send to all peers so parameter cant be senderPeerID
 				peerDict.get(senderPeerID).piecesSinceLastRound++;
 				log(senderPeerID, 10, index);
 				if(updateInteresting(senderPeerID)){
@@ -521,6 +517,9 @@ public class peerProcess extends peerData {
 		/*if(payload == null){
 			return;
 		}*/
+		for(int i=0; i<payload.length;i++){
+			System.out.println((int)payload[i]);
+		}
 		ByteBuffer buf = ByteBuffer.wrap(payload);
 		int num = buf.getInt(0);
 		if(msgType == 0) {
@@ -639,7 +638,6 @@ public class peerProcess extends peerData {
 		try {
 			outputStream.write(a);
 			outputStream.write(b);
-			System.out.println("Sent Have message to peer "+localPID+".");
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
@@ -650,6 +648,10 @@ public class peerProcess extends peerData {
 		for (Map.Entry<Integer, peerData> entry : this.peerDict.entrySet()) {
 				// construct a message from the byte stream coming in, then pass it to handleMessage
 				peerData temp = entry.getValue();
+				System.out.println("Sent Have message to peer "+temp.ID+".");
+				for(int i=0; i<c.length;i++){
+					System.out.println("\t"+c[i]);
+				}
 				//System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
 			try {
 				temp.outboundStream.write(c,0,c.length);
