@@ -424,7 +424,8 @@ public class peerProcess extends peerData {
 			case 1:	log(senderPeerID, 5, -1);
 				addSender(senderPeerID);
 				//fix input types
-				sendRequest(senderPeerID, 1);
+				//LBL A
+				sendRequest(senderPeerID, this.choosePieceToRequest(senderPeerID));
 				break;
 			//interested
 			case 2:	log(senderPeerID, 8, -1);
@@ -753,6 +754,27 @@ public class peerProcess extends peerData {
 			System.out.println("tempindex "+tmpIndex);
 			System.out.println("msglength"+msg.length);
 		}*/
+	}
+
+	private int choosePieceToRequest(int localPID)
+	{
+		BitSet theirs = (BitSet) this.peerDict.get(localPID).bitfield.clone();
+		BitSet ours = (BitSet) internalBitfield.clone();
+		ours.flip(0, this.numberOfPieces);
+		ours.and(theirs);
+		//int[] temp = new int[this.numberOfPieces];
+		LinkedList<Integer> temp = new LinkedList<Integer>();
+		for(int i=0; i<this.numberOfPieces; i++)
+		{
+			if(ours.get(i))
+			{
+				temp.add(i);
+			}
+		}
+
+		int temp_index = (int)(Math.random()*temp.size());
+		int piece = temp.get(temp_index);
+		return piece;
 	}
 
 	private void sendHandshake(int localPID)
