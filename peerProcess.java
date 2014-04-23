@@ -190,6 +190,7 @@ public class peerProcess extends peerData {
 
 		File file = new File("Common.cfg");
 		File file2 = new File("PeerInfo.cfg");
+		//file2.setReadOnly();
 		try {
 			Scanner scanner = new Scanner(file);
 			scanner.next();
@@ -249,6 +250,7 @@ public class peerProcess extends peerData {
 				}	
 			}
 			sc.close();
+			//file2.close();
 		}
 		catch(FileNotFoundException e)
 		{
@@ -340,6 +342,7 @@ public class peerProcess extends peerData {
 					ServerSocket serverSocket = new ServerSocket(peer.portNumber);
 					// Listen for a connection request
 					Socket socket = serverSocket.accept();
+					System.out.println("Heard news.");
 					// Create input/output data streams
 					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
 					DataOutputStream outboundStream = new DataOutputStream(socket.getOutputStream());
@@ -363,6 +366,7 @@ public class peerProcess extends peerData {
 					// DO WE USE OUR PORT OR THEIRS? ASSUMING THEIRS!
 					System.out.println("Attempting to connect to hostname "+peer.hostName+" via socket "+this.portNumber+".");
 					Socket socket = new Socket(peer.hostName, this.portNumber);
+					System.out.println("Connected succesfully.");
 					// Create input/output data streams
 					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
 					DataOutputStream outboundStream = new DataOutputStream(socket.getOutputStream());
@@ -803,9 +807,16 @@ public class peerProcess extends peerData {
 				temp.add(i);
 			}
 		}
-
-		int temp_index = (int)(Math.random()*temp.size());
-		int piece = temp.get(temp_index);
+		try{
+			//if(temp.size()>0)
+			//{
+				int temp_index = (int)(Math.random()*temp.size());
+				int piece = temp.get(temp_index);
+			//}
+		}catch(IndexOutOfBoundsException ex){
+			System.out.println("temp_index: "+temp_index);
+			System.out.println("tempSize: "+temp.size());
+		}
 		return piece;
 	}
 
