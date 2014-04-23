@@ -628,7 +628,6 @@ public class peerProcess extends peerData {
 	{
 	
 		byte[] a = new byte[]{0,0,0,5,4};
-		peerData temp = peerDict.get(localPID);
 		ByteBuffer buf = ByteBuffer.allocate(4);
 		byte[] b = buf.putInt(pieceID).array();
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -641,19 +640,20 @@ public class peerProcess extends peerData {
 			System.out.println(ex.toString());
 			System.out.println("SEND HAVE BYTE MANIP FAILED");
 			System.exit(-1);
-		}
-		
+		}	
 		byte[] c = outputStream.toByteArray();
-		for(int i = 0;i<c.length;i++) {
-			System.out.println("i is "+i+" c is "+c[i]);
-		}
-		try {
-		temp.outboundStream.write(c,0,c.length);
-		}
-		catch(IOException ex) {
-			System.out.println(ex.toString());
-			System.out.println("SEND HAVE FAILED");
-			System.exit(-1);
+		for (Map.Entry<Integer, peerData> entry : this.peerDict.entrySet()) {
+				// construct a message from the byte stream coming in, then pass it to handleMessage
+				peerData temp = entry.getValue();
+				//System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
+			try {
+				temp.outboundStream.write(c,0,c.length);
+			}
+			catch(IOException ex) {
+				System.out.println(ex.toString());
+				System.out.println("SEND HAVE FAILED");
+				System.exit(-1);
+			}
 		}
 	}
 
@@ -816,11 +816,11 @@ public class peerProcess extends peerData {
 	{
 		// less dark bit-wise magic than before
 		// if NOT(bitfield) has no 1's, then bitfield has no 0's
-		int tempSize = this.internalBitfield.size();
+		int tempSize = numberOfPieces;
 		BitSet tempBitfield = new BitSet(tempSize);
 		tempBitfield = (BitSet) internalBitfield.clone();
-		tempBitfield.flip(0, tempSize-1);
-		if(tempBitfield.isEmpty() && tempBitfield.size() == this.numberOfPieces)
+		tempBitfield.flip(0, tempSize);
+		if(tempBitfield.isEmpty())
 		{
 			this.fileComplete = true;
 			System.out.println("FILE! COMPLETE! WOW! SUCH MAGIC! VERY DARK!");
@@ -829,7 +829,6 @@ public class peerProcess extends peerData {
 			this.fileComplete = false;
 		}
 	}
-
 
 	private void log(int localPID, int event, int piece) {
 		//write to logfile
@@ -865,7 +864,7 @@ public class peerProcess extends peerData {
 					break;
 				case 12: msg = "["+time()+"]: "+"Bitfield update on ["+myID+"]";
 					break;
-				case 13: msg = "["+time()+"]: "+"File has completed downloading on "+myID+"!";
+				case 13: msg = "["+time()+"]: "+"File has completed downloading on "+myID+".";
 					break;
 				default: msg = "-1";//exception
 			}
@@ -887,7 +886,8 @@ public class peerProcess extends peerData {
 	if used in log() like--> String msg = "["+time()+"]";*/
 
 	private String time() {
-		GregorianCalendar cal = new GregorianCalendar();
+		TimeZone tm = TimeZone.getDefault();
+		GregorianCalendar cal = new GregorianCalendar(tm);
 		return String.valueOf(cal.get(Calendar.HOUR))+":"+String.valueOf(cal.get(Calendar.MINUTE))+":"+String.valueOf	(cal.get(Calendar.SECOND));
 	}
 	
