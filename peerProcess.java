@@ -321,7 +321,7 @@ public class peerProcess extends peerData {
 			{
 				try {
 					// Create a server socket
-					ServerSocket serverSocket = new ServerSocket(peer.portNumber);
+					ServerSocket serverSocket = new ServerSocket(this.portNumber);
 					// Listen for a connection request
 					Socket socket = serverSocket.accept();
 					// Create input/output data streams
@@ -345,7 +345,7 @@ public class peerProcess extends peerData {
 				try {
 					// Create a client socket
 					// DO WE USE OUR PORT OR THEIRS? ASSUMING THEIRS!
-					Socket socket = new Socket(peer.hostName, this.portNumber);
+					Socket socket = new Socket(peer.hostName, peer.portNumber);
 					// Create input/output data streams
 					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
 					DataOutputStream outboundStream = new DataOutputStream(socket.getOutputStream());
