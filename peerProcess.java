@@ -469,7 +469,11 @@ public class peerProcess extends peerData {
 				updateMyBitfield(index);
 				sendHave(senderPeerID,4);	//method will send to all peers so parameter cant be senderPeerID
 				peerDict.get(senderPeerID).piecesSinceLastRound++;
-				updateInteresting(senderPeerID);
+				if(updateInteresting(senderPeerID)){
+					sendRequest(senderPeerID, this.choosePieceToRequest(senderPeerID));
+				}else{
+					sendNotInterested(senderPeerID);
+				}
 				/*System.out.println("before removerequestsinflight");
 				removeRequestsInFlight(senderPeerID);*/
 				checkCompletion();
@@ -532,15 +536,17 @@ public class peerProcess extends peerData {
 		internalBitfield.set(index);
 	}
 	
-	public void updateInteresting(int senderPeerID) {
+	public boolean updateInteresting(int senderPeerID) {
 		BitSet theirs = (BitSet) this.peerDict.get(senderPeerID).bitfield.clone();
 		BitSet ours = (BitSet) internalBitfield.clone();
 		ours.flip(0, this.numberOfPieces);
 		ours.and(theirs);
 		if(ours.cardinality() > 0){
 			addInteresting(senderPeerID);
+			return true;
 		} else {
 			removeInteresting(senderPeerID);
+			return false;
 		}
 		//compare personal bitfield and sender's bitfield
 		//set sender's interesting variable to true or false
