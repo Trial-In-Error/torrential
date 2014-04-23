@@ -807,17 +807,20 @@ public class peerProcess extends peerData {
 				temp.add(i);
 			}
 		}
+		int temp_index = 0, piece ;
 		try{
 			//if(temp.size()>0)
 			//{
-				int temp_index = (int)(Math.random()*temp.size());
-				int piece = temp.get(temp_index);
+				temp_index = (int)(Math.random()*temp.size());
+				
+			   piece = temp.get(temp_index);
+				return piece;
 			//}
 		}catch(IndexOutOfBoundsException ex){
 			System.out.println("temp_index: "+temp_index);
 			System.out.println("tempSize: "+temp.size());
 		}
-		return piece;
+		return -1;
 	}
 
 	private void sendHandshake(int localPID)
