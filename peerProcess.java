@@ -582,7 +582,7 @@ public class peerProcess extends peerData {
 	private void sendChoke(int localPID)
 	{
 		// send the choke message
-		this.neighborList.remove(localPID);
+		this.neighborList.remove(Integer.valueOf(localPID));
 		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,0};
@@ -601,7 +601,7 @@ public class peerProcess extends peerData {
 	private void sendUnchoke(int localPID)
 	{
 		// send the unChoke message
-		this.neighborList.add(localPID);
+		this.neighborList.add((Integer.valueOf(localPID)));
 		peerData temp = peerDict.get(localPID);
 		
 		byte[] b = new byte[]{0,0,0,1,1};
@@ -820,7 +820,7 @@ public class peerProcess extends peerData {
 			System.out.println("temp_index: "+temp_index);
 			System.out.println("tempSize: "+temp.size());
 		}
-		return -1;
+		return 0;
 	}
 
 	private void sendHandshake(int localPID)
