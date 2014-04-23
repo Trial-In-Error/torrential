@@ -334,6 +334,7 @@ public class peerProcess extends peerData {
 			if(this.peerID < peer.ID)
 			{
 				try {
+					System.out.println("Listening for hostname "+peer.hostName+" via socket "+peer.portNumber+".");
 					// Create a server socket
 					System.out.println(peer.portNumber);
 					ServerSocket serverSocket = new ServerSocket(peer.portNumber);
@@ -360,6 +361,7 @@ public class peerProcess extends peerData {
 				try {
 					// Create a client socket
 					// DO WE USE OUR PORT OR THEIRS? ASSUMING THEIRS!
+					System.out.println("Attempting to connect to hostname "+peer.hostName+" via socket "+this.portNumber+".");
 					Socket socket = new Socket(peer.hostName, this.portNumber);
 					// Create input/output data streams
 					DataInputStream inboundStream = new DataInputStream(socket.getInputStream());
