@@ -97,9 +97,6 @@ public class peerProcess extends peerData {
     		System.exit(1);
 		}
 		localPeer.initialize();
-		//localPeer.log(1, 1, 1);
-		//localPeer.log(1, 2, 1);
-		//localPeer.log(1, 3, 1);
 		long timeUnchoke = System.currentTimeMillis();
 		long timeOp = System.currentTimeMillis();
 		while(true){
@@ -302,9 +299,6 @@ public class peerProcess extends peerData {
 			log(this.peerID, 11, -1);
 			this.bw.flush();
 			System.out.println("UGH!");
-			//this.log(1, 1, 1);
-			//this.log(2, 2, 2);
-			//this.log(3, 3, 3);
 		} catch(Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			System.exit(-1);
@@ -399,7 +393,7 @@ public class peerProcess extends peerData {
 				}else{
 					sendHandshake(senderPeerID);
 				}
-				log(this.peerID, 2, -1);
+				log(senderPeerID, 2, -1);
 				break;
 			//bitfield
 			case 5:
@@ -414,7 +408,7 @@ public class peerProcess extends peerData {
 						sendNotInterested(senderPeerID);
 					}
 				}
-				log(this.peerID, 12, -1);
+				log(senderPeerID, 12, -1);
 				break;
 			//choke
 			case 0:	log(senderPeerID, 6, -1);
@@ -469,6 +463,7 @@ public class peerProcess extends peerData {
 				updateMyBitfield(index);
 				sendHave(senderPeerID,4);	//method will send to all peers so parameter cant be senderPeerID
 				peerDict.get(senderPeerID).piecesSinceLastRound++;
+				log(senderPeerID, 10, index);
 				if(updateInteresting(senderPeerID)){
 					sendRequest(senderPeerID, this.choosePieceToRequest(senderPeerID));
 				}else{
@@ -828,6 +823,7 @@ public class peerProcess extends peerData {
 		if(tempBitfield.isEmpty() && tempBitfield.size() == this.numberOfPieces)
 		{
 			this.fileComplete = true;
+			System.out.println("FILE! COMPLETE! WOW! SUCH MAGIC! VERY DARK!");
 			log(this.peerID,13,1);
 		}else{
 			this.fileComplete = false;
