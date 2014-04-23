@@ -318,16 +318,24 @@ public class peerProcess extends peerData {
 	
 	private void setupConnections() {
 		// for each peer in the dictionary...
-		for(Map.Entry<Integer, peerData> entry: peerDict.entrySet())
+		List<peerData> sortedPeers = new ArrayList<peerData>(peerDict.values());
+		Collections.sort(sortedPeers, new Comparator<peerData>() {
+		
+			public int compare(peerData peer1, peerData peer2) {
+				return peer1.ID - peer2.ID;
+			}		
+		});
+		sortedPeers.remove(Integer.valueOf(this.peerID));
+		for(peerData peer: sortedPeers)
 		{
-			peerData peer = entry.getValue();
+			//peerData peer = entry.getValue();
 			// if we appear first, then we must listen (server)
-			//System.out.println("LOL");
+			System.out.println(peer.ID);
 			if(this.peerID < peer.ID)
 			{
 				try {
 					// Create a server socket
-					System.out.println(this.portNumber);
+					System.out.println(peer.portNumber);
 					ServerSocket serverSocket = new ServerSocket(peer.portNumber);
 					// Listen for a connection request
 					Socket socket = serverSocket.accept();
@@ -398,10 +406,13 @@ public class peerProcess extends peerData {
 		switch (messageType) {
 			//handshake
 			case 8:
+			System.out.println("GOTCHYA!");
 				if(peerDict.get(senderPeerID).initiatedHandshake)
 				{
+					System.out.println("Send bitfield.");
 					sendBitfield(senderPeerID);
 				}else{
+					System.out.println("Send handshake part 2.");
 					sendHandshake(senderPeerID);
 				}
 				log(senderPeerID, 2, -1);
