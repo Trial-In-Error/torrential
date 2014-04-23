@@ -432,6 +432,10 @@ public class peerProcess extends peerData {
 				break;
 			//have
 			case 4:	updateBitfield(senderPeerID, 1, payload);
+				buf = ByteBuffer.wrap(payload);
+				//get index or payload starting from byte 5 of message
+				index = buf.getInt(5);
+				log(senderPeerID, 7, index);
 				// is this REALLY a case of updateInteresting?
 				// it was "interestStatus = get_interest_status" before
 				 updateInteresting(senderPeerID);
@@ -524,6 +528,7 @@ public class peerProcess extends peerData {
 				bits.set(0,numberOfPieces);
 		}
 		else
+			log(senderPeerID, 7, num);
 			bits.set(num);	
 	}
 	
@@ -816,11 +821,11 @@ public class peerProcess extends peerData {
 	{
 		// less dark bit-wise magic than before
 		// if NOT(bitfield) has no 1's, then bitfield has no 0's
-		int tempSize = this.internalBitfield.size();
+		int tempSize = this.numberOfPieces;
 		BitSet tempBitfield = new BitSet(tempSize);
 		tempBitfield = (BitSet) internalBitfield.clone();
-		tempBitfield.flip(0, tempSize-1);
-		if(tempBitfield.isEmpty() && tempBitfield.size() == this.numberOfPieces)
+		tempBitfield.flip(0, tempSize);
+		if(tempBitfield.isEmpty() /*&& tempBitfield.size() == this.numberOfPieces*/)
 		{
 			this.fileComplete = true;
 			System.out.println("FILE! COMPLETE! WOW! SUCH MAGIC! VERY DARK!");
@@ -853,7 +858,7 @@ public class peerProcess extends peerData {
 					break;
 				case 6:	msg = "["+time()+"]: "+"Peer ["+myID+"] is choked by ["+lPID+"]."; 
 					break;
-				case 7: msg = "["+time()+"]: "+"Peer ["+myID+"] received a 'have' message from ["+lPID+"] for the piece["+String.valueOf(piece)+"].";
+				case 7: msg = "["+time()+"]: "+"Peer ["+myID+"] received a 'have' message from ["+lPID+"] for the piece ["+String.valueOf(piece)+"].";
 					break;
 				case 8:	msg = "["+time()+"]: "+"Peer ["+myID+"] receive an 'interested' message from ["+lPID+"].";
 					break;      	
@@ -865,7 +870,7 @@ public class peerProcess extends peerData {
 					break;
 				case 12: msg = "["+time()+"]: "+"Bitfield update on ["+myID+"]";
 					break;
-				case 13: msg = "["+time()+"]: "+"File has completed downloading on "+myID+"!";
+				case 13: msg = "["+time()+"]: "+"Peer ["+myID+"] has downloaded the complete file.";
 					break;
 				default: msg = "-1";//exception
 			}
