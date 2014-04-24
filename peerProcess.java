@@ -485,6 +485,7 @@ public class peerProcess extends peerData {
 				removeRequestsInFlight(senderPeerID);*/
 				checkCompletion();
 				System.out.println("file complete "+this.fileComplete);
+				System.out.println(this.internalBitfield.cardinality()+", "+this.numberOfPieces);
 				break;
 			default://exception
 		}
