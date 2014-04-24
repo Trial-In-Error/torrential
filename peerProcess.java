@@ -879,9 +879,18 @@ public class peerProcess extends peerData {
 				if(temp.bitfield.cardinality() < this.numberOfPieces)
 				{
 					check = false;
+				}else{
+					System.out.println("HAH! I'm considering quitting because peer "+temp.ID+" has cardinality "+temp.bitfield.cardinality()+" out of "+this.numberOfPieces+" pieces.");
+
 				}
+							System.out.println("The bitfield was:");
+			for(int i = 0; i < this.numberOfPieces; i++)
+			{
+				System.out.println(temp.bitfield.get(i));
+			}
 		}
 		if(check)
+
 			System.exit(0);
 	}
 				
