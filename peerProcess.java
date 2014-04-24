@@ -156,18 +156,7 @@ public class peerProcess extends peerData {
 					System.out.println("Just received a message of type "+tempType+" and length "+tempLength);
 					if(payload!=null)
 					{
-						System.out.println("Payload length: "+payload.length);
-						System.out.print("[");
-						for(int i = 0; i < payload.length; i++)
-						{
-							if(true)
-							{
-								System.out.print(payload[i]);
-								System.out.print(", ");
-							}
-						}
-						System.out.print("]\n");
-						
+						System.out.println("Payload length: "+payload.length);	
 					}
 					handleMessage(tempType, entry.ID, payload);
 				}
@@ -219,7 +208,6 @@ public class peerProcess extends peerData {
 		int port_Temp = 0;
 		int hasFile_Temp = 0;
 		setupDirectory(peerID_Temp);
-		setupLogFiles(peerID_Temp);
 		try {
 			Scanner sc = new Scanner(file2);
 			while (sc.hasNext()) {
@@ -244,6 +232,7 @@ public class peerProcess extends peerData {
 					{
 						this.internalBitfield.set(0, this.numberOfPieces);
 						internalBitfield.set(0, this.numberOfPieces);
+						fileComplete = true;
 						//System.out.println("internalBitField cardinality: "+this.internalBitfield.get(0));	
 					}
 					System.out.println("internalBitField cardinality: "+this.internalBitfield.cardinality());
@@ -310,12 +299,6 @@ public class peerProcess extends peerData {
 			System.err.println("Error: " + e.getMessage());
 			System.exit(-1);
 		}
-	}
-	
-	private void setupLogFiles(int ID) {
-			//file.createNewFile();
-			//out.close();	
-
 	}
 	
 	private void setupConnections() {
@@ -459,6 +442,8 @@ public class peerProcess extends peerData {
 				break;
 			//have
 			case 4:	updateBitfield(senderPeerID, 1, payload);
+						if(fileComplete) 
+							terminate();	//will terminate the process only if all other peers have finished downloading
 				// is this REALLY a case of updateInteresting?
 				// it was "interestStatus = get_interest_status" before
 				 updateInteresting(senderPeerID);
@@ -474,8 +459,6 @@ public class peerProcess extends peerData {
 					case 3:	break;
 					default: //exception
 				}
-				if(fileComplete) 
-					terminate();	//will terminate the process only if all other peers have finished downloading
 				break;
 			//request
 			case 6:	buf = ByteBuffer.wrap(payload);
@@ -591,8 +574,8 @@ public class peerProcess extends peerData {
 		
 		byte[] b = new byte[]{0,0,0,1,0};
 		try {
-		temp.outboundStream.write(b,0,b.length);
-		System.out.println("Sent Choke message to peer "+localPID+".");
+			temp.outboundStream.write(b,0,b.length);
+			System.out.println("Sent Choke message to peer "+localPID+".");
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
@@ -645,9 +628,8 @@ public class peerProcess extends peerData {
 		
 		byte[] b = new byte[]{0,0,0,1,3};
 		try {
-
-		temp.outboundStream.write(b,0,b.length);
-		System.out.println("Sent Not Interested message to peer "+localPID+".");
+			temp.outboundStream.write(b,0,b.length);
+			System.out.println("Sent Not Interested message to peer "+localPID+".");
 		}
 		catch(IOException ex) {
 			System.out.println(ex.toString());
@@ -775,9 +757,6 @@ public class peerProcess extends peerData {
 		//message type
 		msg[4] = (byte)7;
 		System.arraycopy(piece, 0, msg, 5, tmpIndex+1);
-		for(int i = 0;i<msg.length;i++) {
-			System.out.println("msg "+msg[i]);
-		}
 		peerData temp = peerDict.get(localPID);
 		try {
 		
@@ -876,28 +855,30 @@ public class peerProcess extends peerData {
 			return this.fileComplete = false;
 		}
 	}
-	private boolean checkPeerCompletion(BitSet bits)
+	/*private boolean checkPeerCompletion(BitSet bits)
 	{
 		// less dark bit-wise magic than before
 		// if NOT(bitfield) has no 1's, then bitfield has no 0's
 		boolean complete;
 		int tempSize = this.numberOfPieces;
 		bits.flip(0, tempSize);
-		if(bits.isEmpty() /*&& tempBitfield.size() == this.numberOfPieces*/)
+		if(bits.isEmpty() && tempBitfield.size() == this.numberOfPieces)
 		{
 			return complete = true;
 		}else{
 			return complete = false;
 		}
-	}
+	}*/
 	private void terminate() {
 		//terminate process once all peers have finished downloading
 		boolean check = true;
 		for (Map.Entry<Integer, peerData> entry : this.peerDict.entrySet()) {
 				// construct a message from the byte stream coming in, then pass it to handleMessage
 				peerData temp = entry.getValue();
-				if(!checkPeerCompletion(temp.bitfield));
+				if(temp.bitfield.cardinality() < this.numberOfPieces)
+				{
 					check = false;
+				}
 		}
 		if(check)
 			System.exit(0);
@@ -955,10 +936,6 @@ public class peerProcess extends peerData {
 			
 	}
 
-	/*time method gets compilation error when called
-	'error: non-static method time() cannot be referenced from a static context'
-	if used in log() like--> String msg = "["+time()+"]";*/
-
 	private String time() {
 		TimeZone tm = TimeZone.getDefault();
 		GregorianCalendar cal = new GregorianCalendar(tm);
@@ -967,7 +944,10 @@ public class peerProcess extends peerData {
 	}
 	
 	private void unchokingUpdate() {
-		
+		if(this.fileComplete)
+		{
+			terminate();
+		}
 		System.out.println("Entered unchoking update.");
 		List<peerData> sortedPeers = new ArrayList<peerData>(peerDict.values());
 		Collections.sort(sortedPeers, new Comparator<peerData>() {
@@ -1014,6 +994,10 @@ public class peerProcess extends peerData {
 	}
 	
 	private void optimisticUnchokingUpdate() {
+		if(this.fileComplete)
+		{
+			terminate();
+		}
 		System.out.println("Entered Optimistic Update");
 		List<peerData> peers = new ArrayList<peerData>(peerDict.values());
 		long seed = System.nanoTime();
