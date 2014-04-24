@@ -856,27 +856,32 @@ public class peerProcess extends peerData {
 			return this.fileComplete = false;
 		}
 	}
-	/*private boolean checkPeerCompletion(BitSet bits)
+	private boolean checkPeerCompletion(BitSet bits)
 	{
 		// less dark bit-wise magic than before
 		// if NOT(bitfield) has no 1's, then bitfield has no 0's
-		boolean complete;
+	
 		int tempSize = this.numberOfPieces;
-		bits.flip(0, tempSize);
-		if(bits.isEmpty() && tempBitfield.size() == this.numberOfPieces)
-		{
-			return complete = true;
-		}else{
-			return complete = false;
+		if(bits.cardinality() == bits.size()) {
+			return true;
 		}
-	}*/
+		else {
+			bits.flip(0, tempSize);
+		}
+		if(bits.isEmpty())
+		{
+			return  true;
+		}else{
+			return  false;
+		}
+	}
 	private void terminate() {
 		//terminate process once all peers have finished downloading
 		boolean check = true;
 		for (Map.Entry<Integer, peerData> entry : this.peerDict.entrySet()) {
 				// construct a message from the byte stream coming in, then pass it to handleMessage
 				peerData temp = entry.getValue();
-				if(temp.bitfield.cardinality() < this.numberOfPieces)
+				if(!checkPeerCompletion(temp.bitfield) )//*temp.bitfield.cardinality() < this.numberOfPieces)*/
 				{
 					check = false;
 				}else{
